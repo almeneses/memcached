@@ -23,7 +23,7 @@ class CacheMemory {
   get(key) {
     if (!this.records.has(key)) return null;
 
-    return this.records.get(key).value;
+    return this.records.get(key);
   }
 
   /**
@@ -138,10 +138,33 @@ class CacheMemory {
     return false;
   }
 
-  cas(key, flags, expTime, bytes, casUnique){
+  
+  /**
+   * Stores the given data but only if no other cas operation has been
+   * issued since the last time it was fetched.
+   *
+   * @param {string} key The record's key.
+   * @param {*} flags The record's flags.
+   * @param {*} expTime The time in which the record will be valid, in seconds.
+   * @param {*}  The value to store.
+   * @param {*} casUnique Unique 64-bit value, usually from a gets operation.
+   * @returns true if
+   * @memberof CacheMemory
+   */
+  cas(key, flags, expTime, value, casUnique){
 
-    //Still in development
+    let storedValue = get(key);
+    const storedCas = storedValue[3];
 
+    if( casUnique == storedCas ){
+      this.records.set(key, [flags, expTime, value, casUnique]);
+    
+      return true;
+
+    } else {
+
+      return false;
+    }
   }
 }
 
