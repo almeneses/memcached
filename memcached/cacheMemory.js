@@ -166,6 +166,16 @@ class CacheMemory {
       return false;
     }
   }
+
+
+  /**
+   * Clears the entire cache memeory.
+   *
+   * @memberof CacheMemory
+   */
+  clear(){
+    this.records.clear();
+  }
 }
 
 module.exports = CacheMemory;
