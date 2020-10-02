@@ -58,15 +58,15 @@ describe('Retrieval tests', () => {
     let testKeys = ["key20", "key1", "e2", "key5", "key11"];
 
     const expectedValues = [
-      null,
+      undefined,
       ["0", "0", "Test value number 1"],
-      null,
+      undefined,
       ["0", "0", "Test value number 5"],
-      null,
+      undefined,
     ];
 
     for (let index = 0; index < testKeys.length; index++) {
-      expect(cache.get(testKeys[index])).toEqual(expectedValues[index]);
+      expect(cache.get(testKeys[index])).toStrictEqual(expectedValues[index]);
     }
 
   })
@@ -152,11 +152,80 @@ describe('Storage tests', () => {
   
     expect(cache.records.get(testKey)).toEqual(expectedValue);
   
+  });  
+
+  test('Replaces an existing record with a new one (replace)', () => {
+
+    const testKey = "key2";
+    [flags, expTime, length, value] = ['10', '5', '52', 'New value for replace test'];
+    const funcResult = cache.replace(testKey, flags, expTime, value);
+    const expectedValue = true;
+    const expectedNewStoredValue = [flags, expTime, value];
+    
+    expect(funcResult).toEqual(expectedValue);
+    expect(cache.records.get(testKey)).toEqual(expectedNewStoredValue);
+
   });
 
-  
+  test('Tries to replace a non-existing record with a new one (replace)', () => {
+
+    const testKey = "nonExistingKey";
+    [flags, expTime, length, value] = ['10', '5', '52', 'New value for replace test'];
+    const funcResult = cache.replace(testKey, flags, expTime, length, value);
+    const expectedValue = false;
+
+    expect(funcResult).toBe(expectedValue);
+  });
+
+  test('Appends a value to an existing record', () => {
+
+    const testKey = "key1";
+    const dataToAppend = " with additional appended data";
+    const funcResult = cache.append(testKey, null);
+    const expectedValue = true;
+
+    expect(funcResult).toBe(expectedValue);
+
+    const expectedStoredValue = ["0", "0", "Test value number 1"];
+    const storedValue = cache.records.get(testKey);
+
+    expect(storedValue).toEqual(expectedStoredValue);
+
+  });
+
+  test('Tries to replace a non-existing record with a new one (replace)', () => {
+
+    const testKey = "nonExistingKey";
+    [flags, expTime, length, value] = ['10', '5', '52', 'New value for replace test'];
+    const funcResult = cache.replace(testKey, flags, expTime, length, value);
+    const expectedValue = false;
+
+    expect(funcResult).toBe(expectedValue);
+  });
+
+  test('Tries to replace a non-existing record with a new one (replace)', () => {
+
+    const testKey = "nonExistingKey";
+    [flags, expTime, length, value] = ['10', '5', '52', 'New value for replace test'];
+    const funcResult = cache.replace(testKey, flags, expTime, length, value);
+    const expectedValue = false;
+
+    expect(funcResult).toBe(expectedValue);
+  });
+
+  test('Tries to replace a non-existing record with a new one (replace)', () => {
+
+    const testKey = "nonExistingKey";
+    [flags, expTime, length, value] = ['10', '5', '52', 'New value for replace test'];
+    const funcResult = cache.replace(testKey, flags, expTime, length, value);
+    const expectedValue = false;
+
+    expect(funcResult).toBe(expectedValue);
+  });
 
 });
+
+
 
 
 
