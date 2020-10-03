@@ -1,8 +1,3 @@
-/** 
- * 
- * @typedef
-*/
-
 'use strict';
 
 const Record = require('./record');
@@ -14,6 +9,11 @@ const Record = require('./record');
  * @param {number} dataMaxSize Maximum size of data blocks, in MegaBytes.
  * @class CacheMemory Creates a cache memory object.
  */
+
+ /*
+  * Note: Creo que esta clase en realidad debería extender Map e implementar los checks ahi
+  * facilitaría también el control del tamaño y LRU de la memoria, ¿o quizá otra clase tipo service?
+  */
 class CacheMemory {
 
   constructor(memSize = 0, dataMaxSize = 1) {
@@ -27,7 +27,7 @@ class CacheMemory {
    * Gets the value from the cache.
    *
    * @param {string} key the record's key.
-   * @returns The value corresponding to the key without casUnique, undefined if not in the cache.
+   * @returns {Record} The value corresponding to the key, undefined if not in the cache.
    * @memberof CacheMemory
    */
   get(key) {
@@ -132,8 +132,9 @@ class CacheMemory {
     let record = this.records.get(key);
 
     if( record ){
+      record.update(flags, expTime, value);
       this.records.delete(key);
-      this.records.set(key, record.update(flags, expTime, value));
+      this.records.set(key, record);
 
       return true;
     }
@@ -204,9 +205,9 @@ class CacheMemory {
    * @param {string} key The record's key.
    * @param {*} flags The record's flags.
    * @param {*} expTime The time in which the record will be valid, in seconds.
-   * @param {*} value The value to store.
+   * @param {Buffer} value The value to store.
    * @param {*} casUnique Unique 64-bit value, usually from a gets operation.
-   * @returns {{saved: true}}  If the value was stored.
+   * @returns {{stored: true}}  If the value was stored.
    * @returns {{exitsts: true}}  If the value has been altered by a previous store operation.
    * @returns {{notFound: boolean}} If the key does not exists within the cache.
    * @memberof CacheMemory
@@ -220,12 +221,13 @@ class CacheMemory {
 
       if( casUnique == record.casUnique ){
 
+        record.update(flags, expTime, value);
         this.records.delete(key);
-        this.records.set(key, new Record(flags, expTime, value));
-        record.saved = true;
+        this.records.set(key, record);
+        result.stored = true;
       
       } else {
-        record.exists = true;
+        result.exists = true;
       }
 
     } else {
@@ -241,20 +243,23 @@ class CacheMemory {
   /**
    * Checks the entire cache memory for expired keys and deletes them.
    *
-   * @param {number} [interval=0] Time between checks for expired keys, in miliseconds.
+   * @param {number} [interval = -1] Time between checks for expired keys, in miliseconds,
+   * if interval is negative it won't do any checking.
    * @memberof CacheMemory
    */
-  async purgeExpired(interval = 0){
+  async purgeExpired(interval = -1){
     
-    setInterval(() => {
-      
-      for( let [key, record] of this.records){
+    if( interval >= 0 ){
+      setInterval(() => {
+        
+        for( let [key, record] of this.records){
 
-        if( record.isExpired() )
-          this.records.delete(key);
-      }
+          if( record.isExpired() )
+            this.records.delete(key);
+        }
 
-    }, interval);
+      }, interval);
+    }
   }
 
   /**
@@ -278,7 +283,7 @@ class CacheMemory {
   }
 
   updateCacheData({record: record}){
-    this.memUsed += record;
+    this.memUsed += sizeOf(record);
   }
 }
 

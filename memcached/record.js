@@ -13,24 +13,25 @@ class Record{
    * @param {} value The record's value to store.
    * @memberof Record
    */
-  constructor(flags, expTime, value){
+  constructor(flags, expTime, value, casUnique){
 
-    this.flags = flags;
-    this.casUnique = 0;
+    this.flags = flags || 0;
+    this.casUnique = casUnique || 0;
     this.value = value;
 
     if(expTime){
 
       if( expTime > MAX_OFFSET_TIME )
-        this.value = value * 1000;
+        this.expTime = expTime ;
       else
-        this.expTime = Date.now() + (expTime * 1000);
+        this.expTime = (Date.now() / 1000) + expTime;
     }
 
   }
 
   /**
-   * 
+   * Updates the value of the record. It should really be
+   * used for operations involving casUnique or any store update.
    *
    * @param {number} flags
    * @param {number} expTime
@@ -47,7 +48,7 @@ class Record{
   }
 
   isExpired(){
-    return this.expTime ? (Date.now() > this.expTime) : true;
+    return this.expTime ? (Date.now() / 1000 > this.expTime) : false;
   }
 
 
