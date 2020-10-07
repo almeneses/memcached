@@ -6,18 +6,25 @@ const Globals = require('./globals/globals');
 const Config = require('./globals/config');
 const CacheMemory = require('./memcached/cacheMemory');
 const Parser = require('./parser/parser');
-const Record = require('./memcached/record');
 const Console = require('./console/console');
 
 const server = new Net.Server();
 const cache = new CacheMemory(Config.memsize, Config.dataMaxSize);
 const parser = new Parser();
 
+//Loads the command line parameters into the global Config object.
 Config.loadConfig( Console.getParams(process.argv) );
 
+cache.purgeExpired(Config.purgeKeys);
+
+server.listen(Config.port, () => { console.log(`Memcached server is now running on port: ${Config.port}`) });
+server.on('connection', handleConnection);
 
 function handleConnection(socket){
 
+  /* Context object, used to keep track of the overall flow state
+   * across all the events in the server.
+   */
   let context = {
     receivingData : false,
     line : {
@@ -32,10 +39,11 @@ function handleConnection(socket){
     data: null,
     bytesRead: 0,
     buffer: null,
-    reset: function(){
 
-    context.receivingData = false;
-    context.line = {
+    reset(){
+
+    this.receivingData = false;
+    this.line = {
       command: null,
       key: null,
       flags: 0,
@@ -44,22 +52,36 @@ function handleConnection(socket){
       casUnique: 0,
       noreply : false,
     };
-    context.data = null;
-    context.bytesRead = 0;
-    context.buffer= null;
+    this.data = null;
+    this.bytesRead = 0;
+    this.buffer= null;
 
     }
-  }
-
+  };
+  
+  /**
+   * Handles the data comming from a "data" event on a socket, depending on
+   * the current context, it stores data to a Buffer or executes a incoming command.
+   *
+   * @param {*} chunk The chunk of data.
+   * 
+   */
   function handleData(chunk){
 
     if( context.receivingData ){
       
       if( context.bytesRead < context.line.bytes ){
+        try { 
+         
+          readData(chunk, context);
         
-        
-        readData(chunk, context);
-  
+        } catch (error) {
+
+          socket.write(`${Globals.RESPONSE.CLIENT_ERROR} ${error.message}\r\n`);
+          context.reset();
+          return;
+
+        }
       } 
       
       if( context.bytesRead = context.line.bytes ) {
@@ -76,19 +98,19 @@ function handleConnection(socket){
       try {
   
         context.line = parser.parseCommand(chunk);
-      
+
       } catch (error) {
         
         socket.write( Globals.RESPONSE.CLIENT_ERROR + " " + error.message + "\r\n" );
+        context.reset();
         return;
       }
-  
-      
   
       if( Globals.OPERATIONS.STORE.includes(context.line.command) ){
         
         if( context.line.bytes > Config.dataMaxSize ){
-          socket.write(Globals.RESPONSE.SERVER_ERROR + " object too large for cache, max size is " + Config.dataMaxSize + "\r\n");
+          socket.write(Globals.RESPONSE.CLIENT_ERROR + " object too large for cache, max size is " + Config.dataMaxSize + "\r\n");
+          context.reset();
           return;
         }
         
@@ -99,7 +121,11 @@ function handleConnection(socket){
       if( Globals.OPERATIONS.RETRIEVE.includes(context.line.command) ){
   
         executeCommand(context);
-  
+      }
+
+      if( Globals.OPERATIONS.QUIT.includes(context.line.command) ){
+
+        executeCommand(context);
       }
     
     }
@@ -107,18 +133,46 @@ function handleConnection(socket){
   };
 
   function readData(chunk, context){
-
+    
     for(let i = 0; i < chunk.length; i++){
-  
-      if( context.bytesRead < context.line.bytes ){
+
+      // If the end of data is reached (13 & 10 = \r\n).
+      if( chunk[i] == 13 && chunk[i+1] == 10 ){
+        
+        if( context.bytesRead == context.line.bytes ){
+        
+          break;
+        
+        } else {
+          
+          throw new Error("Bad data chunk");
+
+        }
+
+      } else {
+
+        //If more data than the specified amount is sent
+        if( context.bytesRead > context.line.bytes ){
+
+          throw new Error("Bad data chunk");
+        
+        }
+
         context.data[context.bytesRead] = chunk[i];
         context.bytesRead++;
+
       }
-  
     }
   
   };
 
+
+  /**
+   * Executes any of the available cache commands according to the given context data
+   * and wirte the result to the socket.
+   *
+   * @param {*} context
+   */
   function executeCommand(context){
   
     let stored;
@@ -215,6 +269,12 @@ function handleConnection(socket){
           socket.write(finalResponse);
           
         }
+
+        break;
+      
+      case "quit":
+        socket.destroy();
+        break;
   
     }
   
@@ -234,11 +294,5 @@ function handleConnection(socket){
   socket.on('error', handleError);
   socket.on('end', handleEnd);
   
-
   console.log(`Client connected from: ${socket.remoteAddress}`);
 }
-
-cache.purgeExpired(Config.purgeKeys);
-
-server.listen(Config.port);
-server.on('connection', handleConnection);
