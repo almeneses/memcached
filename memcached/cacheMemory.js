@@ -178,7 +178,7 @@ class CacheMemory {
    * Appends the given value to an existing value in the cache with the given key.
    *
    * @param {string} key The record's key.
-   * @param {string} appendValue The value to append.
+   * @param {Buffer} appendValue The value to append.
    * @returns true if there was existing data to append to, false otherwise.
    * @memberof CacheMemory
    */
@@ -207,7 +207,7 @@ class CacheMemory {
    * Prepends the given value to an existing value in the cache with the given key.
    *
    * @param {string} key The record's key
-   * @param {string} prependValue The value to prepend.
+   * @param {Buffer} prependValue The value to prepend.
    * @returns true if there was existing data to prepend to, false otherwise.
    * @memberof CacheMemory
    */
