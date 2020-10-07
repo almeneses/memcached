@@ -7,10 +7,14 @@ const Config = require('./globals/config');
 const CacheMemory = require('./memcached/cacheMemory');
 const Parser = require('./parser/parser');
 const Record = require('./memcached/record');
+const Console = require('./console/console');
 
 const server = new Net.Server();
-const cache = new CacheMemory(Config.MEMSIZE, Config.DATA_MAX_SIZE);
+const cache = new CacheMemory(Config.memsize, Config.dataMaxSize);
 const parser = new Parser();
+
+Config.loadConfig( Console.getParams(process.argv) );
+
 
 function handleConnection(socket){
 
@@ -83,8 +87,8 @@ function handleConnection(socket){
   
       if( Globals.OPERATIONS.STORE.includes(context.line.command) ){
         
-        if( context.line.bytes > Config.DATA_MAX_SIZE ){
-          socket.write(Globals.RESPONSE.SERVER_ERROR + " object too large for cache, max size is " + Config.DATA_MAX_SIZE + "\r\n");
+        if( context.line.bytes > Config.dataMaxSize ){
+          socket.write(Globals.RESPONSE.SERVER_ERROR + " object too large for cache, max size is " + Config.dataMaxSize + "\r\n");
           return;
         }
         
@@ -100,7 +104,7 @@ function handleConnection(socket){
     
     }
   
-  }
+  };
 
   function readData(chunk, context){
 
@@ -113,7 +117,7 @@ function handleConnection(socket){
   
     }
   
-  }
+  };
 
   function executeCommand(context){
   
@@ -216,16 +220,25 @@ function handleConnection(socket){
   
     context.reset();
   
-  }
+  };
 
+  function handleError(err){
+    console.log(`Error: ${err}`);
+  };
+
+  function handleEnd(data) {
+    console.log(`Socket closed from the client: ${socket.remoteAddress}`);
+  };
+  
   socket.on('data', handleData);
-  socket.on('end', function() {
-    console.log('Dont forget to close connection');
-  });
+  socket.on('error', handleError);
+  socket.on('end', handleEnd);
+  
 
+  console.log(`Client connected from: ${socket.remoteAddress}`);
 }
 
 cache.purgeExpired(Config.purgeKeys);
 
-server.listen(Config.PORT);
+server.listen(Config.port);
 server.on('connection', handleConnection);
