@@ -1,163 +1,231 @@
-const CacheMemory = require('./memcached/cacheMemory');
+'use strict';
+
 const Net = require('net');
 
+const Globals = require('./globals/globals');
+const Config = require('./globals/config');
+const CacheMemory = require('./memcached/cacheMemory');
+const Parser = require('./parser/parser');
+const Record = require('./memcached/record');
+
 const server = new Net.Server();
-let cache = new CacheMemory(250);
+const cache = new CacheMemory(Config.MEMSIZE, Config.DATA_MAX_SIZE);
+const parser = new Parser();
 
-function handleCommand(state, commandParams){
+function handleConnection(socket){
 
-  state.command = commandParams[0];
-  state.key = commandParams[1];
-  state.flags = commandParams[2];
-  state.exptime = commandParams[3];
-  state.bytes = commandParams[4];
-  state.noreply = commandParams.length == 6;
+  let context = {
+    receivingData : false,
+    line : {
+      command: null,
+      key: null,
+      flags: 0,
+      expTime: 0,
+      bytes: 0,
+      casUnique: 0,
+      noreply : false,
+    },
+    data: null,
+    bytesRead: 0,
+    buffer: null,
+    reset: function(){
 
+    context.receivingData = false;
+    context.line = {
+      command: null,
+      key: null,
+      flags: 0,
+      expTime: 0,
+      bytes: 0,
+      casUnique: 0,
+      noreply : false,
+    };
+    context.data = null;
+    context.bytesRead = 0;
+    context.buffer= null;
 
-
-};
-
-function handleStore(state, chunk/*, callbackFunc*/){
-
-  receivingData = false;
-  state.data = chunk.slice(0, chunk.length - 2).toString();
-  //callbackFunc(state.key, state.flags, state.exptime, state.value);
-
-};
-
-
-server.listen({port: 1111}, function(){
-  console.log("Server working...");
-});
-
-
-
-
-server.on('connection', function(socket){
-  
-  console.log("New connection from: " + socket.remoteAddress + " Port: " + socket.remotePort);
-  
-  let state = {command: null, key: null, flags: 0, exptime: 0, bytes: 0, noreply: false, casUnique: null, data: null, receivingData:false, handle: null};
-  let test = 0;
-
-  socket.on('data', function(chunk){
-    
-    if( state.receivingData ){
-
-      state.receivingData = false;
-      handleStore(state, chunk);
-
-      if(state.command == "add"){
-
-        if ( cache.add(state.key, state.flags, state.exptime, state.data) ){
-         
-          if( !state.noreply )
-            socket.write("STORED\r\n");
-        
-        } else {
-        
-          socket.write("NOT_STORED\r\n");
-        
-        }
-        
-      }
-
-      if( state.command == "set" ){
-        if ( cache.set(state.key, state.flags, state.exptime, state.value) ){
-        
-          if( !state.noreply ){
-            socket.write("STORED\r\n");
-          }
-        
-        } else{
-          socket.write("NOT_STORED\r\n");
-        }
-      }
-
-      if( state.command == "append" ){
-        if( cache.append(state.key, state.value) ){
-          if(!cache.noreply){
-            socket.write("STORED\r\n");
-          }
-
-        } else {
-          socket.write("NOT_STORED\r\n");
-        }
-      }
-
-      if( state.command == "prepend" ){
-        if( cache.prepend(state.key, state.value) ){
-          if(!cache.noreply){
-            socket.write("STORED\r\n");
-          }
-
-        } else {
-          socket.write("NOT_STORED\r\n");
-        }
-
-      }
-
-      if( state.command == "cas" ){
-
-        if( cache.cas(state.key, state.flags, state.exptime, state.value, state.casUnique) ){
-          if(!cache.noreply){
-            socket.write("STORED\r\n");
-          }
-
-        } else {
-          socket.write("NOT_STORED\r\n");
-        }
-
-      }
-
-
-      
-
-    } else {
-
-      const splittedData = chunk.slice(0, chunk.length - 2).toString().split(" ");
-      handleCommand(state, splittedData);
-
-      if( state.command == "get" ){
-        let val = null;
-        for(let i = 1; i < splittedData.length; i++){
-
-          val = cache.get(splittedData[i]);
-          if ( val )
-            socket.write("VALUE " + splittedData[i] + " " + val[0] + " " + Buffer.byteLength(val[2]) + "\r\n" + val[2] + "\r\n");
-        }
-        socket.write("END\r\n");
-        
-      }
-
-      if( state.command == "gets" ){
-        let val = null;
-        for(let i = 1; i < splittedData.length; i++){
-          val = cache.gets(splittedData[i]);
-          if ( val )
-            socket.write("VALUE " + splittedData[i] + " " + val[0] + " " + Buffer.byteLength(val[2]) + " " + val[3] +"\r\n" + val[2] + "\r\n");
-        }
-      }
-
-      if( ["add", "set", "cas", "replace", "append", "preprend"].includes(state.command) ){
-        state.receivingData = true;
-        
-        
-      }
-
-
-      
     }
+  }
 
-    console.log(chunk);
-    console.log(chunk.toString().slice(0,chunk.length - 1).split(" "));
-    console.log(`Data from client: ${chunk.toString()}`);
-    console.log(cache.records.values());
+  function handleData(chunk){
+
+    if( context.receivingData ){
+      
+      if( context.bytesRead < context.line.bytes ){
+        
+        
+        readData(chunk, context);
+  
+      } 
+      
+      if( context.bytesRead = context.line.bytes ) {
+
+        context.receivingData = false;
+        context.bytesRead = 0;
+        context.bytes = 0;
+        
+        executeCommand(context);
+      }
+  
+    } else {
+  
+      try {
+  
+        context.line = parser.parseCommand(chunk);
+      
+      } catch (error) {
+        
+        socket.write( Globals.RESPONSE.CLIENT_ERROR + " " + error.message + "\r\n" );
+        return;
+      }
+  
+      
+  
+      if( Globals.OPERATIONS.STORE.includes(context.line.command) ){
+        
+        if( context.line.bytes > Config.DATA_MAX_SIZE ){
+          socket.write(Globals.RESPONSE.SERVER_ERROR + " object too large for cache, max size is " + Config.DATA_MAX_SIZE + "\r\n");
+          return;
+        }
+        
+        context.data = Buffer.allocUnsafe(context.line.bytes);
+        context.receivingData = true;
+      }
+  
+      if( Globals.OPERATIONS.RETRIEVE.includes(context.line.command) ){
+  
+        executeCommand(context);
+  
+      }
     
-  });
+    }
+  
+  }
 
+  function readData(chunk, context){
+
+    for(let i = 0; i < chunk.length; i++){
+  
+      if( context.bytesRead < context.line.bytes ){
+        context.data[context.bytesRead] = chunk[i];
+        context.bytesRead++;
+      }
+  
+    }
+  
+  }
+
+  function executeCommand(context){
+  
+    let stored;
+    let record;
+
+    switch(context.line.command){
+
+      case "get":
+        
+        context.line.key.forEach((key) =>{
+
+          record = cache.get(key);
+          if ( record )
+            socket.write("VALUE " + key + " " + record.flags + " " + record.value.length + "\r\n" + record.value + "\r\n");
+
+        });
+
+        socket.write("END\r\n");
+
+        break;        
+
+      case "gets":
+        
+        context.line.key.forEach((key) =>{
+
+          record = cache.get(key);
+          if ( record )
+            socket.write("VALUE " + key + " " + record.flags + " " + record.value.length +  " " + record.casUnique + "\r\n" + record.value + "\r\n");
+
+        });
+        
+        socket.write("END\r\n");
+
+        break;
+      
+      case "add":
+  
+        stored = cache.add(context.line.key, context.line.flags, context.line.expTime, context.data);
+        
+        if( !context.line.noreply )
+          socket.write( stored ? Globals.RESPONSE.STORED : Globals.RESPONSE.NOT_STORED );
+        
+        break;
+  
+      case "set":
+  
+        cache.set(context.line.key, context.line.flags, context.line.expTime, context.data)
+  
+        if( !context.line.noreply )
+          socket.write(Globals.RESPONSE.STORED);
+        
+        break;
+  
+      case "append":
+  
+        stored = cache.append(context.line.key, context.data);
+  
+        if(!cache.noreply)
+          socket.write( stored ? Globals.RESPONSE.STORED : Globals.RESPONSE.NOT_STORED );
+  
+        break;
+  
+      case "prepend":
+  
+        stored  = cache.prepend(context.line.key, context.data);
+  
+        if(!context.line.noreply)            
+          socket.write( stored ? Globals.RESPONSE.STORED : Globals.RESPONSE.NOT_STORED );
+  
+        break;
+  
+      case "cas":
+  
+        stored = cache.cas(context.line.key, context.line.flags, context.line.expTime, context.line.data, context.line.casUnique);
+  
+        if(!cache.noreply){
+          let finalResponse;
+  
+          switch(stored){
+          
+            case stored.stored:
+              finalResponse = Globals.RESPONSE.STORED;
+              break;
+          
+            case stored.notFound:
+              finalResponse = Globals.RESPONSE.NOT_FOUND;
+              break;
+          
+            case stored.exists:
+              finalResponse = Globals.RESPONSE.EXISTS;
+              break;
+          }
+  
+          socket.write(finalResponse);
+          
+        }
+  
+    }
+  
+    context.reset();
+  
+  }
+
+  socket.on('data', handleData);
   socket.on('end', function() {
     console.log('Dont forget to close connection');
   });
 
-});
+}
+
+cache.purgeExpired(Config.purgeKeys);
+
+server.listen(Config.PORT);
+server.on('connection', handleConnection);

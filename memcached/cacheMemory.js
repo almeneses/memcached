@@ -18,9 +18,9 @@ class CacheMemory {
 
   constructor(memSize = 0, dataMaxSize = 1) {
     this.records = new Map();
-    this.memSize = memSize * 1024 * 1024;
+    this.memSize = memSize;
     this.memUsed = 0;
-    this.dataMaxSize = dataMaxSize * 1024 * 1024;
+    this.dataMaxSize = dataMaxSize;
   }
 
   /**
@@ -89,7 +89,7 @@ class CacheMemory {
   set(key, flags, expTime, value) {
     
     let record = this.records.get(key);
-
+    
     if( record ){
 
       this.records.delete(key);
@@ -101,7 +101,9 @@ class CacheMemory {
     
     }
 
+    this.makeSpaceIfFull( record.getSize() );
     this.records.set(key, record);
+    this.memUsed += record.getSize();
   
   }
 
@@ -118,11 +120,28 @@ class CacheMemory {
    * @memberof CacheMemory
    */
   add(key, flags, expTime, value) {
+    
+    let record = this.records.get(key);
 
-    if (this.records.has(key)) 
-      return false;
+    if ( record ) {
+      
+      if( record.isExpired() ){
+      
+        this.records.delete(key);
+        this.memUsed -= record.getSize();
+      
+      } else {
 
-    this.records.set(key, new Record(flags, expTime, value));
+        return false;
+      
+      }
+    }
+     
+    record = new Record(flags, expTime, value);
+    
+    this.makeSpaceIfFull( record.getSize() );
+    this.records.set(key, record);
+    this.memUsed += record.getSize();
 
     return true;
   }
@@ -142,7 +161,9 @@ class CacheMemory {
     let record = this.records.get(key);
 
     if( record ){
+      
       record.update(flags, expTime, value);
+      this.makeSpaceIfFull( record.getSize() );
       this.records.delete(key);
       this.records.set(key, record);
 
@@ -168,9 +189,11 @@ class CacheMemory {
     if( record ){
       //This it to prevent falsy values to be appended and do unnecessary work
       if( appendValue ){
+
         record.update(null, null, Buffer.concat([record.value, appendValue]));
+        this.makeSpaceIfFull( record.getSize() );
         this.records.delete(key);
-        this.records.set(key, value);
+        this.records.set(key, record);
       }
 
       return true;
@@ -193,13 +216,12 @@ class CacheMemory {
     let record = this.records.get(key);
 
     if( record ){
-      //This it to prevent falsy values to be prepended and do unnecessary work
-      if( prependValue ){
-        record.update(null, null, Buffer.concat([prependValue, record.value]));
-        this.records.delete(key);
-        this.records.set(key, value);
-      }
-
+      
+      record.update(null, null, Buffer.concat([prependValue, record.value]));
+      this.makeSpaceIfFull( record.getSize() );
+      this.records.delete(key);
+      this.records.set(key, record);
+  
       return true;
     }
 
@@ -213,12 +235,12 @@ class CacheMemory {
    * issued since the last time it was fetched.
    *
    * @param {string} key The record's key.
-   * @param {*} flags The record's flags.
-   * @param {*} expTime The time in which the record will be valid, in seconds.
-   * @param {*} value The value to store.
-   * @param {*} casUnique Unique 64-bit value, usually from a gets operation.
+   * @param {number} flags The record's flags.
+   * @param {number} expTime The time in which the record will be valid, in seconds.
+   * @param {Buffer} value The value to store.
+   * @param {number} casUnique Unique 64-bit value, usually from a gets operation.
    * @returns {{stored: true}}  If the value was stored.
-   * @returns {{exitsts: true}}  If the value has been altered by a previous store operation.
+   * @returns { {exitsts: true} }  If the value has been altered by a previous store operation.
    * @returns {{notFound: boolean}} If the key does not exists within the cache.
    * @memberof CacheMemory
    */
@@ -232,8 +254,10 @@ class CacheMemory {
       if( casUnique == record.casUnique ){
 
         record.update(flags, expTime, value);
+        this.makeSpaceIfFull( record.getSize() );
         this.records.delete(key);
         this.records.set(key, record);
+
         result.stored = true;
       
       } else {
@@ -251,38 +275,28 @@ class CacheMemory {
   }
 
   /**
-   * Checks the entire cache memory for expired keys and deletes them.
+   * Sets a timer that checks the entire cache memory for expired keys and deletes them.
    *
    * @param {number} [interval = -1] Time between checks for expired keys, in miliseconds.
    * if interval is negative it won't do any purging.
    * @memberof CacheMemory
    */
-  async purgeExpired(interval = -1){
+  purgeExpired(interval = -1){
     
     if( interval >= 0 ){
       setInterval(() => {
-        
+
         for( let [key, record] of this.records){
 
-          if( record.isExpired() )
+          if( record.isExpired() ){
             this.records.delete(key);
             this.memUsed -= record.getSize();
+          }
         }
 
       }, interval);
     }
   }
-
-  /**
-   * Clears the entire cache memeory.
-   *
-   * @memberof CacheMemory
-   */
-  clear(){
-    this.records.clear();
-    this.memUsed = 0;
-  }
-
   
   /**
    * Gets the key of the Least Recently Used item in the cache.
@@ -292,23 +306,22 @@ class CacheMemory {
    */
   makeSpaceIfFull(bytes){
 
-    while( (this.memUsed + bytes) >= this.memSize ){
+    while( (this.memUsed + bytes) > this.memSize ){
       this.deleteLRU();
     }
 
   }
   
+  /**
+   * Deletes the Least Recently Used item in the cache.
+   *
+   * @memberof CacheMemory
+   */
   deleteLRU(){
-    const [key, record] = this.records.entries().next().value; 
+    let [key, record] = this.records.entries().next().value; 
     this.records.delete(key);
     this.memUsed -= record.getSize();
   }
-  
-  updateCacheData({record: record}){
-    this.memUsed += sizeOf(record);
-  }
-
-
 
 }
 
