@@ -22,11 +22,12 @@ node server/server.js
 
 The server can be started specifying some options:
 
-| Option          | Description                                                            |
-|-----------------|------------------------------------------------------------------------|
-| --port          | The port for accepting connections, **default:** 11211.                |
-| --memsize       | Size of the Cache Memory in Megabyte, **default:** 100.               |
-| --data-max-size | The maximum allowed size for stored data in Megabytes, **default:** 1. |
+| Option              | Description                                                            |
+|---------------------|------------------------------------------------------------------------|
+| --port              | The port for accepting connections, **default:** 11211.                |
+| --memsize           | Size of the Cache Memory in Megabyte, **default:** 100.                |
+| --data-max-size     | The maximum allowed size for stored data in Megabytes, **default:** 1. |
+| --purge-expired-keys| Time (in millis) between checks for expired keys to purge them, 0 means check as fast as possible. **default:** disabled|
 
 
 An example:
@@ -39,13 +40,13 @@ node server/server.js --data-max-size=2 --port=11200 --memsize=500
 
 - JavaScript has fixed size limit that prevents the cache to have more than 134 million entries so this first version has this limitation too. An improvement/workaround to this limitation might come in the future.
 
+- This is still a work in progress. 
 
 ## Tests
 
-There are 2 testing dependencies:
+There's 1 testing dependencies:
 
 - Jest.
-- memcached - For using the client.
 
 Before running tests, install the dependencies:
 
