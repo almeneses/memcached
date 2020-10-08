@@ -13,6 +13,7 @@
   "author": "almeneses",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^26.4.2"
+    "jest": "^26.4.2",
+    "memcached": "^2.2.2"
   }
 }

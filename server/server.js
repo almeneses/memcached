@@ -2,18 +2,19 @@
 
 const Net = require('net');
 
-const Globals = require('./globals/globals');
-const Config = require('./globals/config');
-const CacheMemory = require('./memcached/cacheMemory');
-const Parser = require('./parser/parser');
-const Console = require('./console/console');
+const Globals = require('../globals/globals');
+const Config = require('../globals/config');
+const CacheMemory = require('./libs/cacheMemory');
+const CommandParser = require('./libs/commandParser');
+const ConsoleParser = require('./libs/consoleParser');
 
 const server = new Net.Server();
 const cache = new CacheMemory(Config.memsize, Config.dataMaxSize);
-const parser = new Parser();
+const commandParser = new CommandParser(null, Globals.OPERATIONS);
+const consoleParser = new ConsoleParser();
 
 //Loads the command line parameters into the global Config object.
-Config.loadConfig( Console.getParams(process.argv) );
+Config.loadConfig( consoleParser.getParams(process.argv) );
 
 cache.purgeExpired(Config.purgeKeys);
 
@@ -94,18 +95,27 @@ function handleConnection(socket){
       }
   
     } else {
-  
+      
+      //Finds the position of \r\n
+      let i = 0;
+      while( !(chunk[i] == 13 && chunk[i+1] == 10) ){
+        i++;
+      }
+
+      //Since the current "state" is "waiting for a command", we try to parse
+      //whatever is in the incomming buffer into a command.
       try {
   
-        context.line = parser.parseCommand(chunk);
-
+        context.line = commandParser.parseCommand(chunk.slice(0, i+2));
+        
       } catch (error) {
         
         socket.write( Globals.RESPONSE.CLIENT_ERROR + " " + error.message + "\r\n" );
         context.reset();
         return;
       }
-  
+      
+      //If it's a STORE operation, read more data
       if( Globals.OPERATIONS.STORE.includes(context.line.command) ){
         
         if( context.line.bytes > Config.dataMaxSize ){
@@ -116,6 +126,7 @@ function handleConnection(socket){
         
         context.data = Buffer.allocUnsafe(context.line.bytes);
         context.receivingData = true;
+        readData(chunk.slice(i + 2, chunk.length), context, executeCommand);
       }
   
       if( Globals.OPERATIONS.RETRIEVE.includes(context.line.command) ){
@@ -132,7 +143,7 @@ function handleConnection(socket){
   
   };
 
-  function readData(chunk, context){
+  function readData(chunk, context, callback){
     
     for(let i = 0; i < chunk.length; i++){
 
@@ -140,7 +151,9 @@ function handleConnection(socket){
       if( chunk[i] == 13 && chunk[i+1] == 10 ){
         
         if( context.bytesRead == context.line.bytes ){
-        
+          
+          if (callback) 
+            callback(context);
           break;
         
         } else {
@@ -171,7 +184,7 @@ function handleConnection(socket){
    * Executes any of the available cache commands according to the given context data
    * and wirte the result to the socket.
    *
-   * @param {*} context
+   * @param {Object} context
    */
   function executeCommand(context){
   
@@ -186,7 +199,7 @@ function handleConnection(socket){
 
           record = cache.get(key);
           if ( record )
-            socket.write("VALUE " + key + " " + record.flags + " " + record.value.length + "\r\n" + record.value + "\r\n");
+            socket.write(`VALUE ${key} ${record.flags} ${record.value.length}\r\n${record.value}\r\n`);
 
         });
 
@@ -219,7 +232,7 @@ function handleConnection(socket){
   
       case "set":
   
-        cache.set(context.line.key, context.line.flags, context.line.expTime, context.data)
+        cache.set(context.line.key, context.line.flags, context.line.expTime, context.data);
   
         if( !context.line.noreply )
           socket.write(Globals.RESPONSE.STORED);
