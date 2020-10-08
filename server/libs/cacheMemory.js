@@ -107,6 +107,37 @@ class CacheMemory {
   
   }
 
+
+
+  /**
+   * Replaces the given value only if the given key is in the cache.
+   *
+    * @param {string} key The record's key.
+   * @param {number} flags The record's flags.
+   * @param {number} expTime The time in which the record will be valid, in seconds.
+   * @param {string} value the value to store.
+   * @returns true if the value was found and replaced, false if not found.
+   * @memberof CacheMemory
+   */
+  replace(key, flags, expTime, value){
+
+    let record = this.records.get(key);
+
+    if( record ){
+
+      this.records.delete(key);
+      record.update(flags, expTime, value);
+      this.makeSpaceIfFull( record.getSize() );
+      this.records.set(key, record);
+      this.memUsed += record.getSize();
+
+      return true;
+    } 
+
+    return false;
+
+  }
+
   /**
    * Stores the given data, but only if the cache does not already
    * hold data for the given key.

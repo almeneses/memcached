@@ -238,6 +238,15 @@ function handleConnection(socket){
           socket.write(Globals.RESPONSE.STORED);
         
         break;
+
+      case "replace":
+
+        stored = cache.replace(context.line.key, context.line.flags, context.line.expTime, context.data);
+  
+        if(!cache.noreply)
+          socket.write( stored ? Globals.RESPONSE.STORED : Globals.RESPONSE.NOT_STORED );
+  
+        break;
   
       case "append":
   
@@ -264,7 +273,7 @@ function handleConnection(socket){
         if(!cache.noreply){
           let finalResponse;
   
-          switch(stored){
+          switch(true){
           
             case stored.stored:
               finalResponse = Globals.RESPONSE.STORED;
