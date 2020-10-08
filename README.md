@@ -2,12 +2,20 @@
 
 A memcached server implemented in NodeJS.
 
+## About
+> Free & open source, high-performance, distributed memory object caching system, generic in nature, but intended for use in speeding up dynamic web applications by alleviating database load.
+
 ## Features
 
 - TCP ASCII protocol.
 - Parameterized cache size and data size.
 - Purges expired keys.
 - Makes space when needed (using the Least Recently Used criteria).
+- The following commands are supported: 
+  - **Storage:** add, set, replace, append, prepend & cas.
+  - **Retrieve:** get & gets.
+
+For details on each command's parameters, see [this list](https://lzone.de/cheat-sheet/memcached) of commands or [refer to the memcached's protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt).
 
 ## Usage
 
@@ -61,10 +69,54 @@ To run all the unit tests:
 npm test
 ```
 
-## Contributing
+# Client
+
+You can use a Unix/telnet terminal as a quick way to issue commands to the server once it has been started:
+
+```bash
+telnet <ip-address> <port> 
+```
+
+In case the memcached server is running in the same device:
+
+```bash
+telnet 127.0.0.1 11211
+```
+
+## Examples
+
+For **storage commands**, in the terminal, you will need to issue the command in two steps.
+
+First, issue the command and press Return:
+
+```bash
+> add my-key 0 0 16
+```
+
+Then, write the value to store and press Return:
+
+```bash
+> Hello memcached!
+```
+
+For **retrieval commands**, only the command and the key are needed, so it is a 1-step process:
+
+```bash
+> get my-key
+```
+
+This gives the following response:
+
+```bash
+VALUE 0 16
+Hello memcached!
+END
+```
+
+# Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
-## License
+# License
 [Beerware](https://spdx.org/licenses/Beerware.html)
