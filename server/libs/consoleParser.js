@@ -1,5 +1,11 @@
 'use strict';
 
+
+/**
+ * Parser for command line input for the memcached server.
+ *
+ * @class ConsoleParser
+ */
 class ConsoleParser {
 
   constructor(paramDashes, paramDivider, defaults){
@@ -15,6 +21,13 @@ class ConsoleParser {
   
   };
 
+  /**
+   * Converts the given string array of input parameters into an object with camelCase keys.
+   *
+   * @param {Array} args
+   * @returns {Object} {key: value} Object with all the parsed parameters.
+   * @memberof ConsoleParser
+   */
   getParams(args){
     
     let result = this.defaults;
