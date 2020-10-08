@@ -19,7 +19,7 @@ class CommandParser {
    */
   constructor (regExp, operations = {}){
     this.regExp = regExp || /^((\b(add|replace|append|prepend|set)\b(\s[^\s\r\n]{1,255})(\s\d+){3}(\snoreply)?)|(\b(get|gets)\b(\s[^\s\r\n]{1,255})+)|(\b(quit)\b))(\r\n)/s;
-    this.operations = operations
+    this.operations = operations;
   }
 
   /**
