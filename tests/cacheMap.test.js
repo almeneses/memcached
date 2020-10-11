@@ -28,8 +28,8 @@ describe('Test for the overriden set method', () => {
 
   });
 
-  test("Setting an item when there is NOT enough space for it," + 
-    " should remove least recently used item", () => {
+  test("Setting an item when there is NOT enough space for it and clean() is NOT implemented should throw an exception", 
+    () => {
 
       const key = "key";
       const key2 = "key2";
@@ -38,15 +38,22 @@ describe('Test for the overriden set method', () => {
 
       /*Cache size is 100 bytes, each item is 76 bytes in size
       * so when adding 2 items, the first one should be deleted
-      * to make space for the second one.
+      * to make space for the second one, triggering the exception.
       */
       const testCache = new CacheMap(100, 4);
       
       testCache.set(key, firstRecord)
-      testCache.set(key2, secondRecord);
 
-      expect(testCache.get(key)).toEqual(undefined);
-      expect(testCache.get(key2)).toEqual(secondRecord);
+      //Tests that the exception thrown is actually the one we expect.
+      try {
+
+        testCache.set(key2, secondRecord)
+      
+      } catch (error) {
+      
+        expect(error.message).toBe("clean() method is not implemented, it must be implemented");
+      
+      }   
 
   });
 

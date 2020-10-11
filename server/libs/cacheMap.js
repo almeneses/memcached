@@ -2,9 +2,6 @@
 
 const Record = require('./record');
 
-const CLEANER = Symbol();
-
-
 /**
  * A Map that behaves similarly to a cache memory.
  *
@@ -25,7 +22,7 @@ class CacheMap extends Map {
 
   set(key, value){
     
-    this[ CLEANER ](value);
+    _clean(value);
     super.set(key, value);
     this.amountUsed += value.getSize();
     
@@ -44,23 +41,15 @@ class CacheMap extends Map {
 
   }
 
-  clean(){
-    this.delete(this.keys().next().value);
-  }
+  _clean(record){
+    
+    const recordSize = record.getSize();
 
-  [ CLEANER ](value){
-    
-    const recordSize = value.getSize();
-    
-    while( (this.amountUsed + recordSize) > this.cacheSize ){
-      this.clean();
+    while( (this.amountUsed + recordSize ) > this.cacheSize ){
+
+      this.delete(this.keys().next().value);
+
     }
-  
-
   }
 
-
-  
-};
-
-module.exports = CacheMap;
+}

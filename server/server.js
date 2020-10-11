@@ -4,19 +4,19 @@ const Net = require('net');
 
 const Globals = require('../globals/globals');
 const Config = require('../globals/config');
-const CacheMemory = require('./libs/cacheMemory');
 const CommandParser = require('./libs/commandParser');
 const ConsoleParser = require('./libs/consoleParser');
+const CacheMap = require('./libs/cacheMap');
 
 const server = new Net.Server();
-const cache = new CacheMemory(Config.memsize, Config.dataMaxSize);
+const cache = new CacheMap(Config.memsize, Config.dataMaxSize);
 const commandParser = new CommandParser(null, Globals.OPERATIONS);
 const consoleParser = new ConsoleParser();
 
 //Loads the command line parameters into the global Config object.
 Config.loadConfig( consoleParser.getParams(process.argv) );
 
-cache.purgeExpired(Config.purgeKeys);
+//cache.purgeExpired(Config.purgeKeys);
 
 server.listen(Config.port, () => { console.log(`Memcached server is now running on port: ${Config.port}`) });
 server.on('connection', handleConnection);
