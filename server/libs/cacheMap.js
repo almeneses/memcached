@@ -43,6 +43,13 @@ class CacheMap extends Map {
     
   }
 
+
+  /**
+   * Removes an item by it's key.
+   *
+   * @param {Object} key
+   * @memberof CacheMap
+   */
   delete(key){
     
     let value = super.get(key);
@@ -56,11 +63,8 @@ class CacheMap extends Map {
 
   }
 
-  add
-
-
   /**
-   * Makes space in the CacheMap for a new Record by removing the Least Recently Used items.
+   * Makes space in the CacheMap for a new Record (if needed) by removing the Least Recently Used items.
    *
    * @param {Record} record The record to make space to
    * @memberof CacheMap
