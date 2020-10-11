@@ -11,11 +11,12 @@ A memcached server implemented in NodeJS.
 - Parameterized cache size and data size.
 - Purges expired keys.
 - Makes space when needed (using the Least Recently Used criteria).
+- It uses [Buffer](https://nodejs.org/api/buffer.html), so storage space is not limmited by V8's heap memory size.
 - The following commands are supported: 
   - **Storage:** add, set, replace, append, prepend & cas.
   - **Retrieve:** get & gets.
 
-For details on each command's parameters, see [this list](https://lzone.de/cheat-sheet/memcached) of commands or [refer to the memcached's protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt).
+For details on each of the command's parameters, see [this list](https://lzone.de/cheat-sheet/memcached) of commands or [refer to the memcached's protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt).
 
 ## Usage
 
