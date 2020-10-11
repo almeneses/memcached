@@ -11,6 +11,7 @@ A memcached server implemented in NodeJS.
 - Parameterized cache size and data size.
 - Purges expired keys.
 - Makes space when needed (using the Least Recently Used criteria).
+- It uses [Buffer](https://nodejs.org/api/buffer.html), so storage space is not limmited by V8's heap memory size.
 - The following commands are supported: 
   - **Storage:** add, set, replace, append, prepend & cas.
   - **Retrieve:** get & gets.
