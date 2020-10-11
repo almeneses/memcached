@@ -9,11 +9,6 @@ const Record = require('./record');
  * @param {number} dataMaxSize Maximum size of data blocks, in MegaBytes.
  * @class CacheMemory Creates a cache memory object.
  */
-
- /*
-  * Note: Creo que esta clase en realidad debería extender Map e implementar los checks ahi
-  * facilitaría también el control del tamaño y LRU de la memoria, ¿o quizá otra clase tipo service?
-  */
 class CacheMemory {
 
   constructor(config = {memSize : 100, dataMaxSize : 1}) {

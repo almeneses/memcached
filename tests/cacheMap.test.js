@@ -1,3 +1,5 @@
+'use strict';
+
 const CacheMap = require('../server/libs/cacheMap');
 const Record = require('../server/libs/record');
 
@@ -28,8 +30,8 @@ describe('Test for the overriden set method', () => {
 
   });
 
-  test("Setting an item when there is NOT enough space for it and clean() is NOT implemented should throw an exception", 
-    () => {
+  test("Setting an item when there is NOT enough space for it," + 
+    " should remove least recently used item", () => {
 
       const key = "key";
       const key2 = "key2";
@@ -38,23 +40,16 @@ describe('Test for the overriden set method', () => {
 
       /*Cache size is 100 bytes, each item is 76 bytes in size
       * so when adding 2 items, the first one should be deleted
-      * to make space for the second one, triggering the exception.
+      * to make space for the second one.
       */
       const testCache = new CacheMap(100, 4);
       
       testCache.set(key, firstRecord)
+      testCache.set(key2, secondRecord);
 
-      //Tests that the exception thrown is actually the one we expect.
-      try {
+      expect(testCache.get(key)).toEqual(undefined);
+      expect(testCache.get(key2)).toEqual(secondRecord);
 
-        testCache.set(key2, secondRecord)
-      
-      } catch (error) {
-      
-        expect(error.message).toBe("clean() method is not implemented, it must be implemented");
-      
-      }   
-
-  });
+    });
 
 });

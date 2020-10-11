@@ -19,6 +19,21 @@ class CacheMap extends Map {
 
   }
 
+  get(key, value){
+
+    const record = super.get(key);
+    
+    if( record ){
+
+      super.delete(key);
+      super.set(key, value);
+
+      return record;
+    }
+
+    return undefined;
+
+  }
 
   set(key, value){
     
@@ -41,6 +56,15 @@ class CacheMap extends Map {
 
   }
 
+  add
+
+
+  /**
+   * Makes space in the CacheMap for a new Record by removing the Least Recently Used items.
+   *
+   * @param {Record} record The record to make space to
+   * @memberof CacheMap
+   */
   _clean(record){
     
     const recordSize = record.getSize();
