@@ -16,11 +16,11 @@ const Record = require('./record');
   */
 class CacheMemory {
 
-  constructor(config = {memSize : 100, dataMaxSize : 1}) {
+  constructor(memSize = 100, dataMaxSize = 1) {
     this.records = new Map();
-    this.memSize = config.memSize;
+    this.memSize = memSize;
     this.memUsed = 0;
-    this.dataMaxSize = config.dataMaxSize;
+    this.dataMaxSize = dataMaxSize;
   }
 
   /**
