@@ -19,14 +19,21 @@ class CacheMap extends Map {
 
   }
 
-  get(key, value){
+  /**
+   * Gets the value stored with the given key.
+   *
+   * @param {*} key The item's key.
+   * @returns The key's value if exists, undefined if not.
+   * @memberof CacheMap
+   */
+  get(key){
 
     const record = super.get(key);
     
     if( record ){
 
       super.delete(key);
-      super.set(key, value);
+      super.set(key, record);
 
       return record;
     }
@@ -35,6 +42,13 @@ class CacheMap extends Map {
 
   }
 
+  /**
+   * Stores a value with the given key.
+   *
+   * @param {*} key The value's key.
+   * @param {*} value The value to store.
+   * @memberof CacheMap
+   */
   set(key, value){
     
     _clean(value);
