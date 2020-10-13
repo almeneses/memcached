@@ -47,7 +47,7 @@ node server/server.js --data-max-size=2 --port=11200 --memsize=500
 
 - Keep in mind that **memsize** and **data-max-size** are not directly related, this means that a memsize of 100MB will **NOT** be able to store 100 items of 1MB of data since the cache needs to store additional data information like expiration time, flags, cas, etc. The approximate overhead is 72 bytes per data.
 
-- JavaScript has fixed size limit that prevents the cache to have more than 134 million entries so this first version has this limitation too. An improvement/workaround to this limitation might come in the future.
+- The V8 engine, which Node uses, has fixed size limit that prevents the cache to have more than 134 million entries so this first version has this limitation too. An improvement/workaround to this limitation might come in the future.
 
 - This is still a work in progress. 
 
