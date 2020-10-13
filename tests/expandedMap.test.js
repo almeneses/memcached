@@ -37,12 +37,56 @@ describe('Tests for expanded behavior in the ExpandedMap', () => {
 
   });
 
+
+  describe('Tests for set functionality', () => {
+
+    test('Empty ExpandedMap, item should be stored in the first internal Map', () => {
+
+      const testKey = "key0";
+      const testValue = "Test value for set";
+      let internalMaps = expandedMap.maps;
+      let firstInternalMap = internalMaps[0];
+      
+      expandedMap.set(testKey, testValue);
+
+      const storedValue = firstInternalMap.get(testKey);
+
+      expect(internalMaps.length).toBe(1);
+      expect(firstInternalMap.size).toBe(1);
+      expect(storedValue).toEqual(testValue);
+
+    });
+
+    test('ExpandedMap with 2 internal maps, items should be stored in the second internal map even if the first map has space',  () => {
+
+      const firstKey = "keyFirstMap";
+      const secondKey = "keySecondMap";
+      const firstValue = "Value in first map";
+      const secondValue = "Value in second map";
+      
+      expandedMap.maps.push(new Map());
+
+      let firstMap = expandedMap.maps[0];
+      let secondMap = expandedMap.maps[1];
+
+      expandedMap.set(firstKey, firstValue);
+      expandedMap.set(secondKey, secondValue);
+
+      expect(firstMap.size).toBe(0);
+      expect(secondMap.size).toBe(2);
+      expect(secondMap.get(firstKey)).toEqual(firstValue);
+      expect(secondMap.get(secondKey)).toEqual(secondValue);
+
+    });
+
+  });
+
   test('ExpandedMap should create a new map when the V8 Map size limit is reached (limit: 2**24 - 1 or 16777216 entries) ', () => {
 
     const totalNumberOfMaps = 2;
     const totalNumberOfFirstMap = 16777216;
-    const totalNumberOfSecondMap = 16777216;
-    let n = 2**25;
+    const totalNumberOfSecondMap = 1;
+    let n = 2**24 + 1;
 
     for (let i = 0; i < n; i++) {
       expandedMap.set(i, i + 1);

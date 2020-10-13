@@ -2,21 +2,17 @@
 
 const Record = require('./record');
 
+const MAP_MAX_ALLOWED_ITEMS = 2 ** 24;
 /**
- * A Map that behaves similarly to a cache memory.
+ * A Map sorted by the Least Recently Used items.
  *
  * @class CacheMap
  * @extends {Map}
  */
-class CacheMap extends Map {
+class LRUSortedMap extends Map {
 
-  constructor(cacheSize, itemSize){
-
+  constructor(){
     super();
-    this.cacheSize = cacheSize;
-    this.itemSize = itemSize;
-    this.amountUsed = 0;
-
   }
 
   /**
@@ -46,52 +42,22 @@ class CacheMap extends Map {
    * Stores a value with the given key.
    *
    * @param {*} key The value's key.
-   * @param {*} value The value to store.
+   * @param {Record} value The value to store.
    * @memberof CacheMap
    */
   set(key, value){
     
-    _clean(value);
+    if( this.isFull() ){
+      super.delete(this.keys().next().value);
+    }
+
     super.set(key, value);
-    this.amountUsed += value.getSize();
     
   }
 
-
-  /**
-   * Removes an item by it's key.
-   *
-   * @param {Object} key
-   * @memberof CacheMap
-   */
-  delete(key){
-    
-    let value = super.get(key);
-    
-    if( value ){
-      
-      super.delete(key);
-      this.amountUsed -= value.getSize();
-
-    }
-
+  isFull(){
+    return this.size == MAP_MAX_ALLOWED_ITEMS;
   }
-
-  /**
-   * Makes space in the CacheMap for a new Record (if needed) by removing the Least Recently Used items.
-   *
-   * @param {Record} record The record to make space to
-   * @memberof CacheMap
-   */
-  _clean(record){
-    
-    const recordSize = record.getSize();
-
-    while( (this.amountUsed + recordSize ) > this.cacheSize ){
-
-      this.delete(this.keys().next().value);
-
-    }
-  }
-
 }
+
+module.exports = LRUSortedMap;

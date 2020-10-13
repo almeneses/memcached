@@ -1,6 +1,7 @@
 'use strict';
 
 const Record = require('./record');
+const CacheMap = require('./cacheMap');
 
 /**
  * In-memory cache.
@@ -11,11 +12,11 @@ const Record = require('./record');
  */
 class CacheMemory {
 
-  constructor(config = {memSize : 100, dataMaxSize : 1}) {
+  constructor(memSize, dataMaxSize) {
     this.records = new Map();
-    this.memSize = config.memSize;
+    this.memSize = memSize;
     this.memUsed = 0;
-    this.dataMaxSize = config.dataMaxSize;
+    this.dataMaxSize = dataMaxSize;
   }
 
   /**
