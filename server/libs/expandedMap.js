@@ -65,7 +65,7 @@ class ExpandedMap {
     
     let map;
     
-    for (let i = 0; i < this.maps.length; i++) {
+    for (let i = this.maps.length - 1; i >= 0; --i) {
       map = this.maps[i];
 
       if( map.has(key) ){
