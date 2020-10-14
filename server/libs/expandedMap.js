@@ -3,7 +3,7 @@
 const MAP_MAX_ITEMS = 2 ** 24;
 
 /**
- * A map that goes beyond the V8's 2^24 item limit.
+ * A map that goes beyond the V8's limit of 2^24 items.
  *
  * @class ExpandedMap
  */
@@ -12,6 +12,7 @@ class ExpandedMap {
   constructor(){
 
     this.maps = [new Map()];
+    this.size = 0;
 
   }
 
@@ -44,20 +45,20 @@ class ExpandedMap {
     if( map.has(key) ){
       
       map.set(key, value);
-      return;
 
     } else {
 
       if( map.size == MAP_MAX_ITEMS ){
 
-        let newMap = new Map().set(key,value);
-        this.maps.push(newMap);
-        return;
+        map = new Map().set(key,value);
+        this.maps.push(map);
       
       }
 
       map.set(key, value);
     }
+
+    return this;
 
   }
 
@@ -66,11 +67,12 @@ class ExpandedMap {
     let map;
     
     for (let i = this.maps.length - 1; i >= 0; --i) {
+      
       map = this.maps[i];
 
       if( map.has(key) ){
-        map.delete(key);
-        return true;
+        
+        return map.delete(key);
       }
       
     }
