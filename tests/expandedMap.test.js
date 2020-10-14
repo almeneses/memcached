@@ -38,6 +38,7 @@ describe('Tests for expanded behavior in the ExpandedMap', () => {
   });
 
 
+
   describe('Tests for set functionality', () => {
 
     test('Empty ExpandedMap, item should be stored in the first internal Map', () => {
@@ -81,24 +82,55 @@ describe('Tests for expanded behavior in the ExpandedMap', () => {
 
   });
 
-  test('ExpandedMap should create a new map when the V8 Map size limit is reached (limit: 2**24 - 1 or 16777216 entries) ', () => {
 
-    const totalNumberOfMaps = 2;
-    const totalNumberOfFirstMap = 16777216;
-    const totalNumberOfSecondMap = 1;
-    let n = 2**24 + 1;
+  
+  describe('Tests for has functionality', () =>{
+    
+    beforeEach(()=>{ 
+      
+      expandedMap = new ExpandedMap(); 
+      expandedMap.maps[0].set("key0", "Test value");
+    });
 
-    for (let i = 0; i < n; i++) {
-      expandedMap.set(i, i + 1);
-    }
+    test('Map with a key, value item. Should return true', () => {
 
-    expect(expandedMap.maps.length).toBe(totalNumberOfMaps);
-    expect(expandedMap.maps[0].size).toBe(totalNumberOfFirstMap);
-    expect(expandedMap.maps[1].size).toBe(totalNumberOfSecondMap);
+      const key = "key0";
+      expect(expandedMap.has(key)).toBe(true);
+
+    });
+
+    test('Map with a key, value. should return false on a non-existing key', () => {
+
+      const key = "nonExistingKey";
+      
+      expect(expandedMap.has(key)).toBe(false);
+
+    });
 
   });
-  
-  
 
+
+
+  describe('Tests for the expansion feature in the ExpandedMap', () => {
+    
+    test('ExpandedMap should create a new map when the V8 Map size limit is reached (limit: 2**24 - 1 or 16777216 entries) ', () => {
+
+      const totalNumberOfMaps = 2;
+      const totalNumberOfFirstMap = 16777216;
+      const totalNumberOfSecondMap = 1;
+      let n = 2**24 + 1;
+  
+      for (let i = 0; i < n; i++) {
+        expandedMap.set(i, i + 1);
+      }
+  
+      expect(expandedMap.maps.length).toBe(totalNumberOfMaps);
+      expect(expandedMap.maps[0].size).toBe(totalNumberOfFirstMap);
+      expect(expandedMap.maps[1].size).toBe(totalNumberOfSecondMap);
+  
+    });
+    
+  });
+  
 
 });
