@@ -21,15 +21,20 @@ describe('Tests for expanded behavior in the ExpandedMap', () => {
 
     });
 
-    test('ExpandedMap with two internal maps, both with the same key but return value should be the one of the later internal map.', () => {
+    test('ExpandedMap with two internal maps, both with the same key but return value should be the last one stored.', () => {
       
       const testKey = "key0";
       const testValueMap1 = "Value in the first map";
       const testValueMap2 = "Value in the second map";
 
-      expandedMap.maps[0].set(testKey, testValueMap1);
       expandedMap.maps.push(new Map());
-      expandedMap.maps[1].set(testKey, testValueMap2);
+      
+      let firstMap = expandedMap.maps[0];
+      let secondMap = expandedMap.maps[1];
+
+      firstMap.set(testKey, testValueMap1);
+      
+      secondMap.set(testKey, testValueMap2);
       
       expect(expandedMap.get(testKey)).toEqual(testValueMap2);
  

@@ -12,7 +12,7 @@ class ExpandedMap {
   constructor(){
 
     this.maps = [new Map()];
-    this.size = 0;
+    this.size = 0n;
 
   }
 
@@ -42,6 +42,7 @@ class ExpandedMap {
     
     let map = this.maps[this.maps.length - 1];
     
+    
     if( map.has(key) ){
       
       map.set(key, value);
@@ -50,16 +51,16 @@ class ExpandedMap {
 
       if( map.size == MAP_MAX_ITEMS ){
 
-        map = new Map().set(key,value);
+        map = new Map();
         this.maps.push(map);
       
       }
 
       map.set(key, value);
+      this.size++;
     }
 
     return this;
-
   }
 
   delete(key){
@@ -72,13 +73,15 @@ class ExpandedMap {
 
       if( map.has(key) ){
         
-        return map.delete(key);
+        map.delete(key);
+        this.size--;
+        
+        return true;
       }
       
     }
 
     return false;
-
   }
 
   has(key){
