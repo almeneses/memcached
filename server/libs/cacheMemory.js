@@ -14,6 +14,7 @@ class CacheMemory {
 
   constructor(memSize = 100, recordSize = 1) {
     this.records = new Memory(memSize, recordSize);
+    this.purge = false;
   }
 
   /**
@@ -220,18 +221,19 @@ class CacheMemory {
    */
   purgeExpired(interval = -1){
     
-    if( interval >= 0 ){
+    if( interval >= 0 && !this.purge ){
       setInterval(() => {
 
-        for( let [key, record] of this.records){
+        for( let [key, record] of this.records ){
 
           if( record.isExpired() ){
             this.records.delete(key);
-            this.memUsed -= record.getSize();
           }
         }
 
       }, interval);
+
+      this.purge = true;
     }
   }
 
