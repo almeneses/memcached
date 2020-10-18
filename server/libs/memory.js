@@ -2,7 +2,7 @@
 
 
 /**
- * A Map with additional storage controls.
+ * A Map with additional internal storage controls.
  *
  * @class Memory
  * @extends {Map}
@@ -52,7 +52,7 @@ class Memory extends Map {
     if( this.has(key) ){
       this.delete(key);
     }
-    
+
     this._makeSpaceIfFull(record);
     this.usedMemory += record.getSize();
     

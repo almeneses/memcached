@@ -87,7 +87,7 @@ describe('Retrieval tests', () => {
     test('Gets a single record from the cache (gets)', () => {
 
       const testKey = "key0";
-      const funcResult = cache.gets(testKey);
+      const funcResult = cache.get(testKey);
       const expectedValue = new Record(0, EXP_TIME_TEST, Buffer.from('Test value number 0'), 0n);
   
       expect(funcResult).toEqual(expectedValue);
@@ -97,7 +97,7 @@ describe('Retrieval tests', () => {
     test('Gets a single record from the cache with different casUnique (gets)', () => {
 
       const testKey = "key9";
-      const funcResult = cache.gets(testKey);
+      const funcResult = cache.get(testKey);
       const expectedValue = new Record(0, EXP_TIME_TEST, Buffer.from('Test value number 9'), 1n);
   
       expect(funcResult).not.toEqual(expectedValue);
