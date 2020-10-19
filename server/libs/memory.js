@@ -1,5 +1,7 @@
 'use strict';
 
+const Globals = require("../../globals/globals");
+
 
 /**
  * A Map with additional internal storage controls.
@@ -9,11 +11,18 @@
  */
 class Memory extends Map {
 
-  constructor(memSize, recordSize){
+
+  /**
+   * Creates an instance of Memory.
+   * @param {number} memSize The total size of the memory, in MegaBytes.
+   * @param {number} recordMaxSize The maximum size of the data to store, in MegaBytes.
+   * @memberof Memory
+   */
+  constructor(memSize, recordMaxSize){
     
     super();
-    this.memSize = memSize;
-    this.recordSize = recordSize;
+    this.memSize = memSize ? (memSize * 1024 * 1024) : 0;
+    this.recordMaxSize = recordMaxSize ? (recordMaxSize * 1024 * 1024) : 0;
     this.usedMemory = 0;
   }
 
@@ -49,11 +58,17 @@ class Memory extends Map {
    */
   set(key, record){
     
+    const recordSize = record.getValueSize();
+
+    if( recordSize > this.recordMaxSize ){
+      throw new Error(Globals.ERRORS.RECORD_BIGGER_THAN_ALLOWED);
+    }
+    
     if( this.has(key) ){
       this.delete(key);
     }
 
-    this._makeSpaceIfFull(record);
+    this._makeSpaceIfFull(record.getSize());
     this.usedMemory += record.getSize();
     
     return super.set(key, record);
@@ -83,7 +98,7 @@ class Memory extends Map {
    * Creates space in the memory based on the number of bytes to store by removing the
    * Least Recently Used records.
    *
-   * @param {number} bytes
+   * @param {number} bytes The amount of bytes of the record to be stored.
    * @memberof Memory
    */
   _makeSpaceIfFull(bytes){

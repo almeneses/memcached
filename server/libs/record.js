@@ -12,7 +12,7 @@ const MAX_OFFSET_TIME = 60*60*24*30;
 const FLAGS_SIZE = 12; 
 const EXPTIME_SIZE = 18;
 const CAS_SIZE = 30;
-const VALUE_SIZE = 10;
+const VALUE_KEY_SIZE = 10;
 
 class Record{
 
@@ -97,7 +97,17 @@ class Record{
    * @memberof Record
    */
   getSize(){
-    return this.value.length + VALUE_SIZE + FLAGS_SIZE + EXPTIME_SIZE + CAS_SIZE;
+    return this.value.length + VALUE_KEY_SIZE + FLAGS_SIZE + EXPTIME_SIZE + CAS_SIZE;
+  }
+
+  /**
+   * The size of the actual data without the internal structure overhead.
+   * 
+   * @returns {number} The size of the data in bytes.
+   * @memberof Record
+   */
+  getValueSize(){
+    return this.value.length;
   }
 
 }

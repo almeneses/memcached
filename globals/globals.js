@@ -13,6 +13,12 @@ const Globals = {
     NOT_FOUND: "NOT_FOUND\r\n",
     SERVER_ERROR: "SERVER_ERROR",
     CLIENT_ERROR: "CLIENT_ERROR",
+  },
+
+  ERRORS: {
+
+    RECORD_BIGGER_THAN_ALLOWED: "The size of the value is greater than the allowed value"
+
   }
 }
 
