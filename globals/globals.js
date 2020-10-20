@@ -17,7 +17,8 @@ const Globals = {
 
   ERRORS: {
 
-    RECORD_BIGGER_THAN_ALLOWED: "The size of the value is greater than the allowed value"
+    RECORD_BIGGER_THAN_ALLOWED: "The size of the value is greater than the allowed value",
+    COMMAND_IN_BAD_FORMAT: "The given command or arguments do not comply with this memcached protocol"
 
   }
 }

@@ -1,4 +1,5 @@
 'use strict';
+
 const Globals = require('../../globals/globals');
 
 
@@ -14,7 +15,7 @@ class CommandParser {
    * Creates an instance of CommandParser.
    * 
    * @param {RegExp} regExp Regular expression to check for the incoming command to parse.
-   * @param {Object} [operations={}] Operations object with the supported operation types { RETRIEVE: Array, STORE: Array, QUIT: string }.
+   * @param {Object} [operations={}] Operations object with the supported operation types { RETRIEVE: Array, STORE: Array, QUIT: Array}.
    * @memberof CommandParser
    */
   constructor (regExp, operations = {}){
@@ -61,7 +62,7 @@ class CommandParser {
 
     if( !this._isValid(command) ){
 
-      throw new Error("The given command or arguments do not comply with this memcached protocol");
+      throw new Error(Globals.ERRORS.COMMAND_IN_BAD_FORMAT);
               
     } 
 

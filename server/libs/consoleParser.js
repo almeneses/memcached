@@ -2,7 +2,7 @@
 
 
 /**
- * Parser for command line input for the memcached server.
+ * Parser for command line input arguments for the memcached server.
  *
  * @class ConsoleParser
  */
@@ -32,6 +32,7 @@ class ConsoleParser {
     
     let result = this.defaults;
 
+    //The first two args are node path and the app executable path.
     for (let i = 2; i < args.length; i++) {
 
       let [option, value] = args[i].split(this.paramDivider);
