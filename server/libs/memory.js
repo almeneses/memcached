@@ -102,10 +102,7 @@ class Memory extends Map {
    * @memberof Memory
    */
   _makeSpaceIfFull(bytes){
-
-    let key;
-    let value;
-
+    
     while( (this.usedMemory + bytes) > this.memSize ){
       this.delete(this.keys().next().value);
     }
