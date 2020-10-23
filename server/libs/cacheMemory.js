@@ -1,7 +1,19 @@
 'use strict';
 
+const Constants = require('../../globals/constants');
 const Memory = require('./memory');
 const Record = require('./record');
+
+/*
+* Note: 
+* Quizá es mejor que CacheMemory sea una especie de Memcached completo
+* y retorne los valores como lo haría el server (strings). El interpretador
+* de los comandos sería más simple.
+*
+* Considerar que una clase ExtendedMap que permita superar el límite de 2^24 items
+* podría hacer las operaciones O(n) (con un n pequeño, pero n igualmente). 
+*/
+
 
 /**
  * In-memory cache.
@@ -14,7 +26,7 @@ class CacheMemory {
 
   constructor(memSize = 100, recordSize = 1) {
     this.records = new Memory(memSize, recordSize);
-    this.purge = false;
+    this._purging = 0;
   }
 
   /**
@@ -36,6 +48,7 @@ class CacheMemory {
     return record;
     
   }
+
 
   /**
    * Stores the given value to the given key, replaces it if
@@ -67,7 +80,7 @@ class CacheMemory {
   /**
    * Replaces the given value only if the given key is in the cache.
    *
-    * @param {string} key The record's key.
+   * @param {string} key The record's key.
    * @param {number} flags The record's flags.
    * @param {number} expTime The time in which the record will be valid, in seconds.
    * @param {string} value the value to store.
@@ -196,7 +209,6 @@ class CacheMemory {
         record.update(flags, expTime, value);
         this.records.set(key, record);
         result.stored = true;
-      
       } else {
 
         result.exists = true;
@@ -214,15 +226,19 @@ class CacheMemory {
 
   /**
    * Sets a timer that checks the entire cache memory for expired keys and deletes them.
-   *
+   * Every call to this method will stop the its preceding timer.
+   * 
    * @param {number} [interval = -1] Time between checks for expired keys, in miliseconds.
    * if interval is negative it won't do any purging.
    * @memberof CacheMemory
    */
   purgeExpired(interval = -1){
     
-    if( interval >= 0 && !this.purge ){
-      setInterval(() => {
+    if( interval > -1){
+      
+      clearInterval(this._purging);
+
+      this._purging = setInterval(() => {
 
         for( let [key, record] of this.records ){
 
@@ -233,7 +249,10 @@ class CacheMemory {
 
       }, interval);
 
-      this.purge = true;
+    } else {
+
+      clearInterval(this._purging);
+
     }
   }
 

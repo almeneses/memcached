@@ -1,4 +1,4 @@
-const Globals = {
+const Constants = {
   OPERATIONS : {
     STORE: ["add", "set", "replace", "append", "prepend", "cas"],
     RETRIEVE: ["get", "gets"],
@@ -18,9 +18,10 @@ const Globals = {
   ERRORS: {
 
     RECORD_BIGGER_THAN_ALLOWED: "The size of the value is greater than the allowed value",
-    COMMAND_IN_BAD_FORMAT: "The given command or arguments do not comply with this memcached protocol"
+    COMMAND_IN_BAD_FORMAT: "The given command or arguments do not comply with this memcached protocol",
+    BAD_DATA_CHUNK: "Bad data chunk"
 
   }
 }
 
-module.exports = Globals;
+module.exports = Constants;

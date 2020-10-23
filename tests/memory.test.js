@@ -147,10 +147,20 @@ describe('Tests for RETRIEVAL functions', () => {
 
   });
 
-  // test('Retrieving a value should make that value the most recently used item (must be the last inserted value)', () => {
+  test('Retrieving a value should make that value the most recently used item (must be the last inserted value)', () => {
 
-    
+    let keys = Array.from(memory.keys());
+    const firstInsertedKey = "key0";
 
-  // });
+    expect(keys[0]).toEqual(firstInsertedKey);
+
+    memory.get(firstInsertedKey);
+
+    keys = Array.from(memory.keys());
+    const lastInsertedKeyAfterGet = keys[keys.length - 1];
+
+    expect(lastInsertedKeyAfterGet).toEqual(firstInsertedKey);
+
+  });
 
 })

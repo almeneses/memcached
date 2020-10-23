@@ -1,6 +1,6 @@
 'use strict';
 
-const Globals = require("../../globals/globals");
+const Constants = require("../../globals/constants");
 
 
 /**
@@ -21,9 +21,10 @@ class Memory extends Map {
   constructor(memSize, recordMaxSize){
     
     super();
-    this.memSize = memSize ? (memSize * 1024 * 1024) : 0;
-    this.recordMaxSize = recordMaxSize ? (recordMaxSize * 1024 * 1024) : 0;
-    this.usedMemory = 0;
+    this.memSize        = memSize ? (memSize * 1024 * 1024) : 0;
+    this.recordMaxSize  = recordMaxSize ? (recordMaxSize * 1024 * 1024) : 0;
+    this.usedMemory     = 0;
+    this.purging        = 0;
   }
 
 
@@ -61,7 +62,7 @@ class Memory extends Map {
     const recordSize = record.getValueSize();
 
     if( recordSize > this.recordMaxSize ){
-      throw new Error(Globals.ERRORS.RECORD_BIGGER_THAN_ALLOWED);
+      throw new Error(Constants.ERRORS.RECORD_BIGGER_THAN_ALLOWED);
     }
     
     if( this.has(key) ){
