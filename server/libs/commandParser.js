@@ -1,7 +1,17 @@
 'use strict';
 
-const Globals = require('../../globals/globals');
+const Constants = require('../../globals/constants');
 
+
+/* Note: 
+* Creo que se puede omitir incluir el \r\n en el string
+* podria ahorrarse algo de tiempo tanto al convertir a string como
+* en el match de la expresión regular y no habría necesidad de slice()
+* en el _format(), que ahorraria mas tiempo de procesamiento.
+*
+* Usar una RegExp es bastante cómodo y útil pero tiene un precio en performance,
+* Quizá considerar optimizar la RegExp o una manera de parsear el comando sin eso.
+*/
 
 /**
  * Parser for memcached commands.
@@ -52,38 +62,53 @@ class CommandParser {
    *        The buffer of bytes to parse.
    * @throws {Error}
    *        If the given input is not a valid command.
-   * @returns {Command} 
+   * @returns { { command: Command, data: }} 
    *        The command object with all the given values.  
    * @memberof CommandParser
    */
   parseCommand(byteArr){
 
-    let command = byteArr.toString();
+    let command;
+    let data;
 
-    if( !this._isValid(command) ){
+    for (let i = 0, length = byteArr.length - 1; i < length; i++) {
+      
+      if(byteArr[i] == 13 && byteArr[i + 1] == 10){
 
-      throw new Error(Globals.ERRORS.COMMAND_IN_BAD_FORMAT);
+        command = byteArr.slice(0, i + 2).toString();
+        data    = byteArr.slice(i + 2, byteArr.length);
+        
+        break;
+      }      
+    }
+
+    if( !this._isValid(command)){
+
+      throw new Error(Constants.ERRORS.COMMAND_IN_BAD_FORMAT);
               
     } 
 
-    return this._format( command.slice(0, byteArr.length - 2).split(" ") );
+    return {
+      command: this._format( command.slice(0, command.length - 2).split(" ") ),
+      data: data
+    };
   
   }
 
 
   _format(arr){
-    let result = {};
+    let result = {command: null, key: null, flags: null, expTime: null, bytes: 0, casUnique: null, noreply: false};
     
     result.command = arr[0];
 
-    if( this.operations.RETRIEVE.includes( result.command ) ){
+    if( Constants.OPERATIONS.RETRIEVE.includes( result.command ) ){
       result.key = [];
       for (let i = 1; i < arr.length; i++) {
         result.key.push(arr[i]);
       }
     }
 
-    if( this.operations.STORE.includes(result.command) ){
+    if( Constants.OPERATIONS.STORE.includes(result.command) ){
 
       result.key = arr[1];
       result.flags = parseInt(arr[2]);
@@ -104,4 +129,4 @@ class CommandParser {
   
 }
 
-module.exports = CommandParser;
+module.exports = new CommandParser();
