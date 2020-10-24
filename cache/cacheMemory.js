@@ -1,6 +1,6 @@
 'use strict';
 
-const Constants = require('../../globals/constants');
+const Constants = require('../globals/constants');
 const Memory = require('./memory');
 const Record = require('./record');
 

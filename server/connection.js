@@ -1,8 +1,8 @@
 'use strict';
 
 const Constants = require("../globals/constants");
-const CacheMemory = require("./libs/cacheMemory");
-const CommandParser = require("./libs/commandParser");
+const CacheMemory = require("../cache/cacheMemory");
+const CommandParser = require("../parsers/commandParser");
 
 
 /**
@@ -250,31 +250,28 @@ class Connection {
     const expectedBytes = this.commandState.line.bytes + 2; //Include \r\n
     const incommingBytes = this.bytesRead + byteArr.length;
 
-    switch(expectedBytes){
+    if (incommingBytes < expectedBytes){
 
-      case incommingBytes < expectedBytes:
-
-        if( this._hasLineEnding(byteArr) ){
-          throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
-        } 
-  
-        byteArr.copy(this.dataBuffer, bytesRead, 0, byteArr.length);
-        return byteArr.length;
-      
-      case incommingBytes == expectedBytes:
-
-        if( !this._hasLineEnding(byteArr) ){
-          throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
-        }
-  
-        byteArr.copy(this.dataBuffer, bytesRead, 0, byteArr.length);
-  
-        return byteArr.length - 2;
-
-      case incommingBytes > expectedBytes:
-
+      if ( this._hasLineEnding(byteArr) ){
         throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
+      } 
 
+      byteArr.copy(this.dataBuffer, bytesRead, 0, byteArr.length);
+      return byteArr.length;
+    
+    } else if (incommingBytes == expectedBytes){
+
+      if ( !this._hasLineEnding(byteArr) ){
+        throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
+      }
+
+      byteArr.copy(this.dataBuffer, bytesRead, 0, byteArr.length);
+
+      return byteArr.length - 2;
+    
+    } else {
+
+      throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
     }
     
   }

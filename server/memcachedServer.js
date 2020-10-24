@@ -2,8 +2,8 @@
 
 const Net = require('net');
 const Connection = require('./connection');
-const CacheMemory = require('./libs/cacheMemory');
-const CommandParser = require('./libs/commandParser');
+const CacheMemory = require('../cache/cacheMemory');
+const CommandParser = require('../parsers/commandParser');
 
 
 /**

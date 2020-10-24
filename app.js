@@ -1,9 +1,9 @@
 'use strict';
 
 const Config = require('./globals/config');
-const CacheMemory = require('./libs/cacheMemory');
-const CommandParser = require('./server/libs/commandParser');
-const ConsoleParser = require('./server/libs/consoleParser');
+const CacheMemory = require('./cache/cacheMemory');
+const CommandParser = require('./parsers/commandParser');
+const ConsoleParser = require('./parsers/consoleParser');
 const MemcachedServer = require('./server/memcachedServer');
 
 
