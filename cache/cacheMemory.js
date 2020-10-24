@@ -24,9 +24,10 @@ const Record = require('./record');
  */
 class CacheMemory {
 
-  constructor(memSize = 100, recordSize = 1) {
+  constructor({memSize = 100, recordSize = 1, purgeExpiredKeys = -1}) {
     this.records = new Memory(memSize, recordSize);
     this._purging = 0;
+    this.purgeExpired(purgeExpiredKeys);
   }
 
   /**

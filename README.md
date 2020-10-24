@@ -15,6 +15,7 @@ A memcached server implemented in NodeJS.
 - The following commands are supported: 
   - **Storage:** add, set, replace, append, prepend & cas.
   - **Retrieve:** get & gets.
+  - **QUIT:** quit.
 
 For details on each of the command's parameters, see [this list](https://lzone.de/cheat-sheet/memcached) of commands or [refer to the memcached's protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt).
 

@@ -15,7 +15,7 @@ class ConsoleParser {
     this.defaults = defaults || {};
   }
   
-  toCamelCase(str){
+  _toCamelCase(str){
   
     return str.replace(/([-][a-z])/gis , (match) => match.toUpperCase().replace('-', ''));
   
@@ -37,7 +37,7 @@ class ConsoleParser {
 
       let [option, value] = args[i].split(this.paramDivider);
       option = option.slice(this.paramDashes.length, option.length);
-      result[this.toCamelCase(option)] = value;     
+      result[this._toCamelCase(option)] = value;     
     }
 
     return result;

@@ -17,8 +17,8 @@ const Constants = {
 
   ERRORS: {
 
-    RECORD_BIGGER_THAN_ALLOWED: "The size of the value is greater than the allowed value",
-    COMMAND_IN_BAD_FORMAT: "The given command or arguments do not comply with this memcached protocol",
+    RECORD_BIGGER_THAN_ALLOWED: "Data bigger than allowed",
+    BAD_COMMAND_FORMAT: "Bad command format",
     BAD_DATA_CHUNK: "Bad data chunk"
 
   }
