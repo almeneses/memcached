@@ -256,7 +256,7 @@ class Connection {
         throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
       } 
 
-      byteArr.copy(this.dataBuffer, bytesRead, 0, byteArr.length);
+      byteArr.copy(this.dataBuffer, this.bytesRead, 0, byteArr.length);
       return byteArr.length;
     
     } else if (incommingBytes == expectedBytes){
@@ -265,7 +265,7 @@ class Connection {
         throw new Error(Constants.ERRORS.BAD_DATA_CHUNK + "\r\n");
       }
 
-      byteArr.copy(this.dataBuffer, bytesRead, 0, byteArr.length);
+      byteArr.copy(this.dataBuffer, this.bytesRead, 0, byteArr.length);
 
       return byteArr.length - 2;
     
