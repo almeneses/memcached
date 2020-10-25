@@ -1,6 +1,6 @@
 'use strict';
 
-// Max time in seconds in which expTime will be considered as offset time in seconds, 
+// Max time in seconds in which expTime will be considered as an offset time in seconds, 
 // any value higher than this will be considered an UNIX epoch time.
 const MAX_OFFSET_TIME = 60*60*24*30;
 
@@ -28,34 +28,35 @@ class Record{
   constructor(flags, expTime, value, casUnique){
 
     this.flags = flags || 0;
-    this.casUnique = casUnique ? BigInt.asUintN(64, casUnique) : 0n;
-    this.value = value;
+    this.casUnique = casUnique > 0 ? BigInt.asUintN(64, casUnique) : 0n;
+    this.value = value || null;
     this.expTime = this._assignExpTime(expTime);
 
   }
 
   /**
    * Helper method that returns the time in which the
-   * record will expire.
+   * record will expire, 0 means no expiration and an expTime
+   * greater than 
    * 
-   * @param {*} expTime
+   * @param {number} expTime The expiration time, in seconds.
    * @returns The time of expiration of the record.
    * @memberof Record
    */
   _assignExpTime(expTime){
 
     let result = 0;
-    
-    if(expTime == 0)
-      result = 0;
-      
+        
     if(expTime > 0){
 
       if( expTime > MAX_OFFSET_TIME )
-        result = expTime;
+        result = expTime * 1000;
       else
-        result = (Date.now() / 1000) + expTime;
+        result = Date.now() + (expTime * 1000);
     }
+
+    if(expTime < 0)
+      result = Date.now();
 
     return result;
   }
@@ -86,7 +87,7 @@ class Record{
    * @memberof Record
    */
   isExpired(){
-    return this.expTime ? (Date.now() / 1000 > this.expTime) : false;
+    return this.expTime ? (Date.now() > this.expTime) : false;
   }
 
   
