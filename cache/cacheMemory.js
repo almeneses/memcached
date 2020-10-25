@@ -10,6 +10,8 @@ const Record = require('./record');
 * y retorne los valores como lo haría el server (strings). El interpretador
 * de los comandos sería más simple.
 *
+* Tal vez usar un Object como parámetro para todos los métodos.
+*
 * Considerar que una clase ExtendedMap que permita superar el límite de 2^24 items
 * podría hacer las operaciones O(n) (con un n pequeño, pero n igualmente). 
 */
@@ -42,14 +44,15 @@ class CacheMemory {
     const record = this.records.get(key);
     
     if ( record && record.isExpired() ){
+
       this.records.delete(key);
       return undefined;
+
     }
     
     return record;
     
   }
-
 
   /**
    * Stores the given value to the given key, replaces it if
@@ -63,7 +66,7 @@ class CacheMemory {
    */
   set(key, flags, expTime, value) {
     
-    let record = this.records.get(key);
+    let record = this.get(key);
     
     if( record ){ 
 
@@ -90,18 +93,18 @@ class CacheMemory {
    */
   replace(key, flags, expTime, value){
 
-    let record = this.records.get(key);
+    let record = this.get(key);
 
     if( record ){
 
       record.update(flags, expTime, value);
-      this.records.set(key, record);
-
       return true;
+
     } 
 
     return false;
   }
+
 
   /**
    * Stores the given data, but only if the cache does **not** hold data for the given key.
@@ -116,24 +119,18 @@ class CacheMemory {
    */
   add(key, flags, expTime, value) {
     
-    let record = this.records.get(key);
+    let record = this.get(key);
 
     if ( record ) {
-      
-      if( record.isExpired() ){
-      
-        this.records.delete(key);
+      return false;
 
-      } else {
+    } else {
 
-        return false;
-      
-      }
+      this.records.set(key, new Record(flags, expTime, value, 0n));
+
+      return true;
     }
 
-    this.records.set(key, new Record(flags, expTime, value, 0n));
-
-    return true;
   }
 
   /**
@@ -146,7 +143,7 @@ class CacheMemory {
    */
   append(key, appendValue){
 
-    let record = this.records.get(key);
+    let record = this.get(key);
 
     if( record ){
       
@@ -169,7 +166,7 @@ class CacheMemory {
    */
   prepend(key, prependValue){
 
-    let record = this.records.get(key);
+    let record = this.get(key);
 
     if( record ){
       
@@ -181,8 +178,6 @@ class CacheMemory {
 
     return false;
   }
-
-  
   
   /**
    * Stores the given data but only if no other store operation has been
@@ -201,7 +196,7 @@ class CacheMemory {
   cas(key, flags, expTime, value, casUnique){
 
     let result = {};
-    let record = this.records.get(key);
+    let record = this.get(key);
     
     if( record ){
 

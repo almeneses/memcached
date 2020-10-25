@@ -1,5 +1,5 @@
-const Memory = require("../server/libs/memory");
-const Record = require("../server/libs/record");
+const Memory = require("../cache/memory");
+const Record = require("../cache/record");
 
 let memory;
 
@@ -20,6 +20,15 @@ function initializeMemory(memory, numberOfRecords){
 
 describe('Tests for Memory initialization', () => {
 
+  test('Default initilization values', () => {
+    const memory = new Memory();
+
+    expect(memory.memSize).toBe(0);
+    expect(memory.recordMaxSize).toBe(0);
+    expect(memory.usedMemory).toBe(0);
+
+  });
+
   test('Initialize Memory with 50MB memSize & 1MB recordSize', () => {
 
     const memory = new Memory(50, 1);
@@ -30,10 +39,21 @@ describe('Tests for Memory initialization', () => {
 
   });
 
+  test('Initialize Memory with 1345MB memSize & 80MB recordSize', () => {
+
+    const memory = new Memory(1345, 80);
+
+    expect(memory.memSize).toBe(1345 * 1024 * 1024);
+    expect(memory.recordMaxSize).toBe(80 * 1024 * 1024);
+    expect(memory.usedMemory).toBe(0);
+
+  });
+
+
 });
 
 
-describe('Tests for STORAGE functions', () => {
+describe('Tests for SET function', () => {
 
   beforeEach(() => {
 
@@ -124,11 +144,22 @@ describe('Tests for STORAGE functions', () => {
 
   });
 
+  test('Storing a Record should make that value the most recently used item (must be the last inserted value)', () => {
 
+    const lastInsertedKey = "newRecordKey";
+    const record = new Record(0, 0, Buffer.from("Last inserted record"), 0n);
+   
+    memory.set(lastInsertedKey, record);
+
+    let keys = Array.from(memory.keys());
+
+    expect(keys[keys.length - 1]).toEqual(lastInsertedKey);
+
+  });
 });
 
 
-describe('Tests for RETRIEVAL functions', () => {
+describe('Tests for GET function', () => {
   
   beforeEach(() => {
 
@@ -138,7 +169,7 @@ describe('Tests for RETRIEVAL functions', () => {
 
   });
 
-  test('Simply retrieve a value', () => {
+  test('Simply retrieve a Record', () => {
 
     const expectedValue = new Record(0, 0, Buffer.from("Test value 0"), 0n);
     const storedValue = memory.get("key0");
@@ -147,7 +178,7 @@ describe('Tests for RETRIEVAL functions', () => {
 
   });
 
-  test('Retrieving a value should make that value the most recently used item (must be the last inserted value)', () => {
+  test('Retrieving a Record should make that value the most recently used item (must be the last inserted Record)', () => {
 
     let keys = Array.from(memory.keys());
     const firstInsertedKey = "key0";
@@ -163,4 +194,65 @@ describe('Tests for RETRIEVAL functions', () => {
 
   });
 
-})
+});
+
+
+describe('Tests for DELETE function', () => {
+
+  beforeEach(() => {
+    
+    const numberOfRecords = 3;
+    memory = new Memory(100, 1);
+    memory = initializeMemory(memory, numberOfRecords);
+
+  });
+
+  test('Delete an existing Record, should return true', () => {
+
+    const key = "key0";
+
+    expect(memory.get(key)).toBeInstanceOf(Record);
+    expect(memory.delete(key)).toBe(true);
+    expect(memory.get(key)).toBeUndefined();
+
+  });
+
+  test('Delete a non-existing Record should return false', () => {
+
+    const key = "unexistingKey";
+  
+    expect(memory.delete(key)).toBe(false);
+
+  });
+
+  test('Deleting an Record should also substract its size from the usedMemory', () => {
+
+    const key = "key0";
+    const smallMemory = new Memory(10,1);
+    
+    expect(smallMemory.usedMemory).toBe(0);
+
+    //This record has a total size of 80 bytes.
+    const record = new Record(0, 0, Buffer.from("Test value"), 0n);
+    
+    smallMemory.set(key, record);
+    
+    expect(smallMemory.usedMemory).toBe(record.getSize());
+
+    smallMemory.delete(key);
+    expect(smallMemory.usedMemory).toBe(0);
+
+  });
+
+  test('Deleting a non-existin Record should also leave usedMemory untouched', () => {
+
+    const key = "keyNonExisting";
+    const usedMemoryBeforeDelete = memory.usedMemory;
+
+    memory.delete(key);
+
+    expect(memory.usedMemory).toBe(usedMemoryBeforeDelete);
+
+  });
+  
+});

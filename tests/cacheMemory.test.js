@@ -1,5 +1,5 @@
-const CacheMemory = require('../server/libs/cacheMemory');
-const Record = require('../server/libs/record');
+const CacheMemory = require('../cache/cacheMemory');
+const Record = require('../cache/record');
 
 const cache = new CacheMemory(250);
 
@@ -364,4 +364,23 @@ describe('Storage tests', () => {
 
   });
   
+});
+
+describe('Tests for purgeExpired', () => {
+
+  // test('Item should be deleted after a set amount of seconds', () => {
+
+  //   const key = "newRecordKey";
+  
+  //   cache.set(key, 0, 3, Buffer.from("Test value")); // should be deleted after 3 seconds
+
+  //   expect(cache.records.has(key)).toBe(true);
+
+  //   cache.purgeExpired(3000);
+
+
+
+  // })
+  
+
 });
