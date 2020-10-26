@@ -37,7 +37,8 @@ class Record{
   /**
    * Helper method that returns the time in which the
    * record will expire, 0 means no expiration and an expTime
-   * greater than 
+   * greater than 2592000 sec (30 days) will be treated as an
+   * UNIX epoch time.
    * 
    * @param {number} expTime The expiration time, in seconds.
    * @returns The time of expiration of the record.

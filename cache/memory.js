@@ -14,15 +14,15 @@ class Memory extends Map {
 
   /**
    * Creates an instance of Memory.
-   * @param {number} memSize The total size of the memory, in MegaBytes.
+   * @param {number} memize The total size of the memory, in MegaBytes.
    * @param {number} recordMaxSize The maximum size of the data to store, in MegaBytes.
    * @memberof Memory
    */
-  constructor(memSize, recordMaxSize){
+  constructor(memsize, recordMaxSize){
     
     super();
-    this.memSize        = memSize ? (memSize * 1024 * 1024) : 0;
-    this.recordMaxSize  = recordMaxSize ? (recordMaxSize * 1024 * 1024) : 0;
+    this.memsize        = (memsize > 0) ? (memsize * 1024 *1024) : 0;
+    this.recordMaxSize  = (recordMaxSize > 0) ? (recordMaxSize * 1024 * 1024) : 0;
     this.usedMemory     = 0;
     this.purging        = 0;
   }
@@ -104,7 +104,7 @@ class Memory extends Map {
    */
   _makeSpaceIfFull(bytes){
     
-    while( (this.usedMemory + bytes) > this.memSize ){
+    while( (this.usedMemory + bytes) > this.memsize ){
       this.delete(this.keys().next().value);
     }
 

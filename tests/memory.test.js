@@ -23,27 +23,27 @@ describe('Tests for Memory initialization', () => {
   test('Default initilization values', () => {
     const memory = new Memory();
 
-    expect(memory.memSize).toBe(0);
+    expect(memory.memsize).toBe(0);
     expect(memory.recordMaxSize).toBe(0);
     expect(memory.usedMemory).toBe(0);
 
   });
 
-  test('Initialize Memory with 50MB memSize & 1MB recordSize', () => {
+  test('Initialize Memory with 50MB memsize & 1MB recordSize', () => {
 
     const memory = new Memory(50, 1);
 
-    expect(memory.memSize).toBe(50 * 1024 * 1024);
+    expect(memory.memsize).toBe(50 * 1024 * 1024);
     expect(memory.recordMaxSize).toBe(1 * 1024 * 1024);
     expect(memory.usedMemory).toBe(0);
 
   });
 
-  test('Initialize Memory with 1345MB memSize & 80MB recordSize', () => {
+  test('Initialize Memory with 1345MB memsize & 80MB recordSize', () => {
 
     const memory = new Memory(1345, 80);
 
-    expect(memory.memSize).toBe(1345 * 1024 * 1024);
+    expect(memory.memsize).toBe(1345 * 1024 * 1024);
     expect(memory.recordMaxSize).toBe(80 * 1024 * 1024);
     expect(memory.usedMemory).toBe(0);
 

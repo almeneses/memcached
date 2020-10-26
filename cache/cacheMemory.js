@@ -20,14 +20,14 @@ const Record = require('./record');
 /**
  * In-memory cache.
  *
- * @param {number} memSize Cache size in MegaBytes.
+ * @param {number} memsize Cache size in MegaBytes.
  * @param {number} recordSize Maximum size of data blocks, in MegaBytes.
  * @class CacheMemory Creates a cache memory object.
  */
 class CacheMemory {
 
-  constructor({memSize = 100, recordSize = 1, purgeExpiredKeys = -1}) {
-    this.records = new Memory(memSize, recordSize);
+  constructor({memsize = 100, recordSize = 1, purgeExpiredKeys = -1}) {
+    this.records = new Memory(memsize, recordSize);
     this._purging = 0;
     this.purgeExpired(purgeExpiredKeys);
   }
