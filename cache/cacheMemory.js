@@ -61,7 +61,7 @@ class CacheMemory {
    * @param {string} key The record's key.
    * @param {number} flags The record's flags.
    * @param {number} expTime The time in which the record will be valid, in seconds.
-   * @param {string} value the value to store.
+   * @param {Buffer|Uint8Array} value the value to store.
    * @memberof CacheMemory
    */
   set(key, flags, expTime, value) {
@@ -87,7 +87,7 @@ class CacheMemory {
    * @param {string} key The record's key.
    * @param {number} flags The record's flags.
    * @param {number} expTime The time in which the record will be valid, in seconds.
-   * @param {string} value the value to store.
+   * @param {Buffer|Uint8Array} value the value to store.
    * @returns true if the value was found and replaced, false if not found.
    * @memberof CacheMemory
    */
@@ -112,7 +112,7 @@ class CacheMemory {
    * @param {String} key The record's key.
    * @param {number} flags The record's flags.
    * @param {number} expTime The time in which the record will be valid, in seconds.
-   * @param {string} value The value to store.
+   * @param {Buffer|Uint8Array} value The value to store.
    * @returns true if a previous value with the given key
    * does not exist, false otherwise.
    * @memberof CacheMemory

@@ -15,10 +15,7 @@ function fillCacheWithData(numberOfRecords){
   const flag = 0;
 
   for(let i = 0; i < numberOfRecords; i++){
-
-    const casUnique = Math.random() * Math.random() * 100;
     cache.records.set(baseKey + i, new Record(flag, EXP_TIME_TEST, Buffer.from(baseValue + i)));
-
   }
 
 }
@@ -78,7 +75,26 @@ describe('Retrieval tests', () => {
         expect(cache.get(testKeys[index])).toStrictEqual(expectedValues[index]);
       }
   
-    })
+    });
+
+  /* I just couldn't get jest mock timers to work
+   * using them will always make the test pass so I came
+   * up with this "manual" way of checking a setInterval function.
+   */
+    test('Get a key after it has expired should return undefined', async () => {
+
+      const key = "expiredRecordKey";
+      
+      cache.set(key, 0, 2, Buffer.from('Test value'));
+
+      expect(cache.get(key)).not.toBe(undefined);
+      
+      await new Promise((res) => setTimeout(() => {
+        expect(cache.get(key)).toBe(undefined);
+        res();
+        }, 3000));
+
+      });
 
   });
   
@@ -368,19 +384,53 @@ describe('Storage tests', () => {
 
 describe('Tests for purgeExpired', () => {
 
-  // test('Item should be deleted after a set amount of seconds', () => {
+  /* I just couldn't get jest mock timers to work
+   * using them will always make the test pass so I came
+   * up with this "manual" way of checking a setInterval function.
+   */
 
-  //   const key = "newRecordKey";
-  
-  //   cache.set(key, 0, 3, Buffer.from("Test value")); // should be deleted after 3 seconds
+  test('Record should be deleted after a set amount of time', async () => {
+   
+    const key = "newRecordKey";
 
-  //   expect(cache.records.has(key)).toBe(true);
+    cache.purgeExpired(500); //Delete expired keys every 500 milliseconds.
+    cache.set(key, 0, 1, Buffer.from("Test value")); // should be deleted after 1 seconds
 
-  //   cache.purgeExpired(3000);
+    expect(cache.records.has(key)).toBe(true);
 
+    await new Promise(res => setTimeout(() => {
+      
+      expect(cache.records.has(key)).toBe(false);
+      res();
 
+    }, 1100)); //Check after 1.1 seconds.
 
-  // })
+  });
+
+  test('Record should **NOT** be deleted before the set amount of time', async () => {
+
+    const key = "newRecordKey";
+
+    cache.purgeExpired(500);
+    cache.set(key, 0, 1, Buffer.from("Test value"));
+
+    expect(cache.records.has(key)).toBe(true);
+
+    await new Promise(res => setTimeout(() => {
+      
+      expect(cache.records.has(key)).toBe(true);
+      res();
+
+    }, 900)); //Check before 1 second.
+
+    await new Promise(res => setTimeout(() => {
+      
+      expect(cache.records.has(key)).toBe(false);
+      res();
+
+    }, 500)); // check a bit after 1 second.
+    
+  });
   
 
 });
