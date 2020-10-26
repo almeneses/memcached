@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file. This file (
 ### Changed
 - Overall project structure, to make it more modular.
 
-## [0.9.0] - 2015-10-06
+## [0.9.0] - 2020-10-08
 ### Added
 - Basic STORE and RETRIEVE cache functionality.
 - A somewhat working server.
