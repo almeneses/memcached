@@ -353,7 +353,6 @@ describe('Storage tests', () => {
 
     });
 
-
     test('Tries to store a value to a previously modified key (EXISTS)', () => {
       
       const testKey = "key0";
@@ -384,7 +383,7 @@ describe('Storage tests', () => {
 
 describe('Tests for purgeExpired', () => {
 
-  /* I just couldn't get jest mock timers to work
+  /* I just couldn't get jest mock timers to work,
    * using them will always make the test pass so I came
    * up with this "manual" way of checking a setInterval function.
    */
@@ -428,9 +427,8 @@ describe('Tests for purgeExpired', () => {
       expect(cache.records.has(key)).toBe(false);
       res();
 
-    }, 500)); // check a bit after 1 second.
+    }, 800)); // check a bit after 1 second.
     
   });
   
-
 });
