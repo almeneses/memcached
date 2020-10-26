@@ -26,7 +26,7 @@ The server does not have any external dependencies, you can just run it.
 Basic usage with default values:
 
 ```bash
-node server/server.js
+node app.js
 ```
 ### Options
 
