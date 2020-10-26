@@ -42,7 +42,7 @@ The server can be started specifying some options:
 
 An example:
 ```bash
-node server/server.js --data-max-size=2 --port=11200 --memsize=500
+node app.js --data-max-size=2 --port=11200 --memsize=500
 ```
 ### Notes
 
