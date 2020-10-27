@@ -40,16 +40,23 @@ class ExpandedMap {
 
   set(key, value){
     
-    let map = this.maps[this.maps.length - 1];
-    
-    
-    if( map.has(key) ){
-      
+    let map = _findKeyMap(key);
+
+    if( map ){
       map.set(key, value);
-
-    } else {
-
-      if( map.size == MAP_MAX_ITEMS ){
+    }
+    
+    for (let i = 0; i < this.maps.length; i++) {
+      
+      map = this.maps[i];
+    
+      if( map.has(key) ){
+        
+        return map.set(key, value);
+      }
+    } 
+      
+    if( map.size == MAP_MAX_ITEMS ){
 
         map = new Map();
         this.maps.push(map);
@@ -60,7 +67,7 @@ class ExpandedMap {
       this.size++;
     }
 
-    return this;
+      return this;
   }
 
   delete(key){
@@ -101,6 +108,21 @@ class ExpandedMap {
     return false;
   }
 
+  _findKeyMap(key){
+    
+    const length = this.maps.length;
+    let map;
+
+    while (length--) {
+
+      map = this.maps[length];
+
+      if(map.has(key))
+        return map;
+    }
+
+    return null;
+  }
 }
 
 module.exports = ExpandedMap;

@@ -130,13 +130,14 @@ class Connection {
 
       case "get":
         
-        line.key.forEach((key) =>{
+        
+        for (let i = 0, keysLength = line.key.length; i < keysLength; i++) {
+      
+          record = this.cache.get(line.key[keysLength]);
 
-          record = this.cache.get(key);
           if ( record )
             this.socket.write(`VALUE ${key} ${record.flags} ${record.value.length}\r\n${record.value}\r\n`);
-
-        });
+        }
 
         this.socket.write("END\r\n");
 
@@ -144,13 +145,13 @@ class Connection {
 
       case "gets":
         
-        line.key.forEach((key) =>{
+        for (let i = 0, keysLength = line.key.length; i < keysLength; i++) {
 
-          record = this.cache.get(key);
+          record = this.cache.get(line.key[keysLength]);
           if ( record )
             this.socket.write(`VALUE ${key} ${record.flags} ${record.value.length} ${record.casUnique}\r\n${record.value}\r\n`);
 
-        });
+        }
         
         this.socket.write("END\r\n");
 
