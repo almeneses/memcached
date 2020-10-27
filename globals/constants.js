@@ -1,4 +1,4 @@
-const Globals = {
+const Constants = {
   OPERATIONS : {
     STORE: ["add", "set", "replace", "append", "prepend", "cas"],
     RETRIEVE: ["get", "gets"],
@@ -13,7 +13,15 @@ const Globals = {
     NOT_FOUND: "NOT_FOUND\r\n",
     SERVER_ERROR: "SERVER_ERROR",
     CLIENT_ERROR: "CLIENT_ERROR",
+  },
+
+  ERRORS: {
+
+    RECORD_BIGGER_THAN_ALLOWED: "Data bigger than allowed",
+    BAD_COMMAND_FORMAT: "Bad command format",
+    BAD_DATA_CHUNK: "Bad data chunk"
+
   }
 }
 
-module.exports = Globals;
+module.exports = Constants;

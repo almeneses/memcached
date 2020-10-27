@@ -11,12 +11,17 @@ A memcached server implemented in NodeJS.
 - Parameterized cache size and data size.
 - Purges expired keys.
 - Makes space when needed (using the Least Recently Used criteria).
+<<<<<<< HEAD
 - It uses [Buffer](https://nodejs.org/api/buffer.html), so storage space is not limmited by V8's heap memory size.
+=======
+- It uses [Buffer](https://nodejs.org/api/buffer.html), so storage space is not limited by V8's heap memory size.
+>>>>>>> master
 - The following commands are supported: 
   - **Storage:** add, set, replace, append, prepend & cas.
   - **Retrieve:** get & gets.
+  - **QUIT:** quit.
 
-For details on each command's parameters, see [this list](https://lzone.de/cheat-sheet/memcached) of commands or [refer to the memcached's protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt).
+For details on each of the command's parameters, see [this list](https://lzone.de/cheat-sheet/memcached) of commands or [refer to the memcached's protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt).
 
 ## Usage
 
@@ -25,7 +30,7 @@ The server does not have any external dependencies, you can just run it.
 Basic usage with default values:
 
 ```bash
-node server/server.js
+node app.js
 ```
 ### Options
 
@@ -41,9 +46,11 @@ The server can be started specifying some options:
 
 An example:
 ```bash
-node server/server.js --data-max-size=2 --port=11200 --memsize=500
+node app.js --data-max-size=2 --port=11200 --memsize=500
 ```
 ### Notes
+
+- You could consider reducing the amount of V8's garbage collector runs by using the `--max-semi-space-size` (e.g. `node --max-semi-space-size=1024`) launch option to Nodejs. The higher the value(in MB) the less frequent garbage collection executions. Although this might increase the app's performance it could also increase memory usage and have some other side effects so use it at your own risk.
 
 - Keep in mind that **memsize** and **data-max-size** are not directly related, this means that a memsize of 100MB will **NOT** be able to store 100 items of 1MB of data since the cache needs to store additional data information like expiration time, flags, cas, etc. The approximate overhead is 72 bytes per data.
 

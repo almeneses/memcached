@@ -2,7 +2,7 @@
 
 
 /**
- * Parser for command line input for the memcached server.
+ * Parser for command line input arguments for the memcached server.
  *
  * @class ConsoleParser
  */
@@ -15,7 +15,7 @@ class ConsoleParser {
     this.defaults = defaults || {};
   }
   
-  toCamelCase(str){
+  _toCamelCase(str){
   
     return str.replace(/([-][a-z])/gis , (match) => match.toUpperCase().replace('-', ''));
   
@@ -32,11 +32,12 @@ class ConsoleParser {
     
     let result = this.defaults;
 
+    //The first two args are node path and the app executable path.
     for (let i = 2; i < args.length; i++) {
 
       let [option, value] = args[i].split(this.paramDivider);
       option = option.slice(this.paramDashes.length, option.length);
-      result[this.toCamelCase(option)] = value;     
+      result[this._toCamelCase(option)] = value;     
     }
 
     return result;
