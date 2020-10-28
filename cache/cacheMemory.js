@@ -27,18 +27,10 @@ const CacheMap = require('./cacheMap');
  */
 class CacheMemory {
 
-<<<<<<< HEAD:server/libs/cacheMemory.js
-  constructor(memSize, dataMaxSize) {
-    this.records = new Map();
-    this.memSize = memSize;
-    this.memUsed = 0;
-    this.dataMaxSize = dataMaxSize;
-=======
   constructor({memsize = 100, recordSize = 1, purgeExpiredKeys = -1}) {
     this.records = new Memory(memsize, recordSize);
     this._purging = 0;
     this.purgeExpired(purgeExpiredKeys);
->>>>>>> master:cache/cacheMemory.js
   }
 
   /**
