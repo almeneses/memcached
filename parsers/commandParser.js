@@ -74,7 +74,7 @@ class CommandParser {
       if(byteArr[i] == 13 && byteArr[i + 1] == 10){
 
         command = byteArr.toString('utf8', 0, i);
-        data    = byteArr.slice(i + 2, byteArr.length);
+        data    = byteArr.slice(i + Constants.CRLN_LEN, byteArr.length);
         
         break;
       }      

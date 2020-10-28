@@ -21,7 +21,9 @@ const Constants = {
     BAD_COMMAND_FORMAT: "Bad command format",
     BAD_DATA_CHUNK: "Bad data chunk"
 
-  }
+  },
+
+  CRLN_LEN: 2
 }
 
 module.exports = Constants;

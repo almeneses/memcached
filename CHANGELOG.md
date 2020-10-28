@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file. This file (
 ## [1.1.0] - 2020-10-25
 ### Added
 - Improved general performance in the command parsing and execution: 
-  - **STORE** operations: from 31K requests/second avg. => 46K requests/second avg. **\***
-  - **RETRIEVE** operations: from 26K requests/second avg. => 38K requests/second avg. **\***
+  - **STORE** operations: from 41K requests/second avg. => 43K requests/second avg. **\***
+  - **RETRIEVE** operations: from 36K requests/second avg. => 41K requests/second avg. **\***
 - This CHANGELOG file to keep a good track of general changes, commits can be messy and numerous.
 
 ---

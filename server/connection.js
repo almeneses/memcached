@@ -130,13 +130,13 @@ class Connection {
 
       case "get":
         
-        line.key.forEach((key) =>{
+        for (let i = 0, keysLength = line.key.length; i < keysLength; i++) {
+      
+          record = this.cache.get(line.key[i]);
 
-          record = this.cache.get(key);
           if ( record )
-            this.socket.write(`VALUE ${key} ${record.flags} ${record.value.length}\r\n${record.value}\r\n`);
-
-        });
+            this.socket.write(`VALUE ${line.key[i]} ${record.flags} ${record.value.length}\r\n${record.value}\r\n`);
+        }
 
         this.socket.write("END\r\n");
 
@@ -144,13 +144,12 @@ class Connection {
 
       case "gets":
         
-        line.key.forEach((key) =>{
+        for (let i = 0, keysLength = line.key.length; i < keysLength; i++) {
 
-          record = this.cache.get(key);
+          record = this.cache.get(line.key[i]);
           if ( record )
-            this.socket.write(`VALUE ${key} ${record.flags} ${record.value.length} ${record.casUnique}\r\n${record.value}\r\n`);
-
-        });
+            this.socket.write(`VALUE ${line.key[i]} ${record.flags} ${record.value.length} ${record.casUnique}\r\n${record.value}\r\n`);
+        }
         
         this.socket.write("END\r\n");
 
@@ -247,7 +246,7 @@ class Connection {
    */
   _readData(byteArr){
     
-    const expectedBytes = this.commandState.line.bytes + 2; //Include \r\n
+    const expectedBytes = this.commandState.line.bytes + Constants.CRLN_LEN; //Include \r\n
     const incommingBytes = this.bytesRead + byteArr.length;
 
     if (incommingBytes < expectedBytes){
