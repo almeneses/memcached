@@ -46,7 +46,6 @@ class Connection {
     
   }
 
-
   /**
    * Parses the incomming data.
    *
@@ -74,41 +73,28 @@ class Connection {
       try {
         
         this.commandState = this.parser.parseCommand(byteArr);
+  
+        if( Constants.OPERATIONS.STORE.includes( this.commandState.line.command ) ){
 
-      } catch (error) {
+          this.receivingData = true;
+          this.dataBuffer = Buffer.allocUnsafe(this.commandState.line.bytes);
+          this.bytesRead += this._readData(this.commandState.data, 0, this.commandState.line.bytes);
+        
+        }
+            
+      } catch (error){
 
         this.socket.write(`${Constants.RESPONSE.CLIENT_ERROR} ${error.message}\r\n`);
         this._reset();
-
-      }
-      
-      
-      if( Constants.OPERATIONS.STORE.includes( this.commandState.line.command ) ){
-
-        this.receivingData = true;
-        this.dataBuffer = Buffer.allocUnsafe(this.commandState.line.bytes);
-
-        try {
-          
-          this.bytesRead += this._readData(this.commandState.data, 0, this.commandState.line.bytes);
-
-        } catch (error) {
-
-          this.socket.write(`${Constants.RESPONSE.CLIENT_ERROR} ${error.message}\r\n`);
-          this._reset();
-          
-        }
-
+            
       }
 
     }
 
     if( this.bytesRead == this.commandState.line.bytes ){
     
-      if(callback){
-        callback(this.commandState.line, this.dataBuffer);
-        this._reset();
-      }
+      callback && callback(this.commandState.line, this.dataBuffer);
+      this._reset();
 
     }
 
@@ -256,6 +242,7 @@ class Connection {
       } 
 
       byteArr.copy(this.dataBuffer, this.bytesRead, 0, byteArr.length);
+
       return byteArr.length;
     
     } else if (incommingBytes == expectedBytes){
@@ -266,7 +253,7 @@ class Connection {
 
       byteArr.copy(this.dataBuffer, this.bytesRead, 0, byteArr.length);
 
-      return byteArr.length - 2;
+      return byteArr.length - Constants.CRLN_LEN;
     
     } else {
 
@@ -288,7 +275,7 @@ class Connection {
   _hasLineEnding(byteArr){
 
     //13 and 10 are ASCII byte codes for \r and \n respectively.
-    return byteArr[byteArr.length - 2] == 13 && byteArr[byteArr.length - 1] == 10;
+    return byteArr[byteArr.length - ] == 13 && byteArr[byteArr.length - 1] == 10;
   
   }
 
