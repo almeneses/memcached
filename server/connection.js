@@ -275,7 +275,7 @@ class Connection {
   _hasLineEnding(byteArr){
 
     //13 and 10 are ASCII byte codes for \r and \n respectively.
-    return byteArr[byteArr.length - ] == 13 && byteArr[byteArr.length - 1] == 10;
+    return byteArr[byteArr.length - 2] == 13 && byteArr[byteArr.length - 1] == 10;
   
   }
 
