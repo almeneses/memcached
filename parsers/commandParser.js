@@ -13,6 +13,11 @@ const Constants = require('../globals/constants');
 * Quizá considerar optimizar la RegExp o una manera de parsear el comando sin eso.
 */
 
+const DEFAULT_REGEXP = new RegExp([
+
+
+]);
+
 /**
  * Parser for memcached commands.
  *
@@ -28,7 +33,7 @@ class CommandParser {
    * @memberof CommandParser
    */
   constructor (regExp){
-    this.regExp = regExp || /^((\b(add|replace|append|prepend|set)\b(\s[^\s\r\n]{1,255})(\s\d+){3}(\snoreply)?)|(\b(get|gets)\b(\s[^\s\r\n]{1,255})+)|(\bcas\b)((\s[^\s\r\n]{1,255})(\s\d+){4}(\snoreply)?)|(\b(quit)\b))/s;
+    this.regExp = regExp || /(gets?)( (\w{1,250}))+?$|cas \w{1,250}( \d+){4}( noreply)?$|(?:add|set|append|prepend|replace).\w{1,250}( \d+){3}?( noreply)?$|quit$/s;
 
   }
 
@@ -75,22 +80,19 @@ class CommandParser {
 
         command = byteArr.toString('utf8', 0, i);
         data    = byteArr.slice(i + Constants.CRLN_LEN, byteArr.length);
-        
+
         break;
-      }      
+      }
+            
     }
 
-    if( !this._isValid(command)){
-
+    if( !this._isValid(command) )
       throw new Error(Constants.ERRORS.BAD_COMMAND_FORMAT);
-              
-    } 
 
     return {
       line: this._format( command.split(" ") ),
       data: data
     };
-
 
   }
 
@@ -108,30 +110,46 @@ class CommandParser {
     
     result.command = commandArr[0];
 
-    if( Constants.OPERATIONS.RETRIEVE.includes( result.command ) ){
+    switch(result.command){
+
+      case 'get':
+      case 'gets':
+
+        result.key = commandArr.slice(1, commandArr.length);
+        if (result.key.length == 0)
+          throw new Error(Constants.ERRORS.BAD_COMMAND_FORMAT);
+        break;
       
-      result.key = commandArr.slice(1, commandArr.length);
+      case 'add':
+      case 'set':
+      case 'append':
+      case 'prepend':
+      case 'replace':
+      case 'cas':
+
+        result.key      = commandArr[1];
+        result.flags    = parseInt(commandArr[2]);
+        result.expTime  = parseInt(commandArr[3]);
+        result.bytes    = parseInt(commandArr[4]);
+        result.noreply  = commandArr[5] == "noreply";
+
+        if( result.command == "cas"){
+        
+          if(!commandArr[5]) 
+            throw new Error(Constants.ERRORS.BAD_COMMAND_FORMAT);
+
+          result.casUnique = BigInt.asUintN(64, commandArr[5]);
+          result.noreply = commandArr[6] == "noreply";
+        }
+
+        break;
       
-      return result;
-    }
-
-    if( Constants.OPERATIONS.STORE.includes(result.command) ){
-
-      result.key = commandArr[1];
-      result.flags = parseInt(commandArr[2]);
-      result.expTime = parseInt(commandArr[3]);
-      result.bytes = parseInt(commandArr[4]);
-      result.noreply = commandArr[5] == "noreply";
-
-      if( result.command == "cas" ){
-        result.casUnique = BigInt.asUintN(64, commandArr[5]);
-        result.noreply = commandArr[6] == "noreply";
-      }
-
+      default:
+        throw new Error(Constants.ERRORS.BAD_COMMAND_FORMAT);
     }
 
     return result;
-
+    
   }
 
 }
