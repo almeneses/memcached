@@ -33,7 +33,7 @@ class CommandParser {
    * @memberof CommandParser
    */
   constructor (regExp){
-    this.regExp = regExp || /(gets?)( (\w{1,250}))+?$|cas \w{1,250}( \d+){4}( noreply)?$|(?:add|set|append|prepend|replace).\w{1,250}( \d+){3}?( noreply)?$|quit$/s;
+    this.regExp = regExp || /(gets?)( (\w{1,250}))+?$|cas \w{1,250}( \d+){4}( noreply)?$|(?:add|set|append|prepend|replace).\w{1,250}( \d+){3}?( noreply)?$|quit/s;
 
   }
 
@@ -112,14 +112,6 @@ class CommandParser {
 
     switch(result.command){
 
-      case 'get':
-      case 'gets':
-
-        result.key = commandArr.slice(1, commandArr.length);
-        if (result.key.length == 0)
-          throw new Error(Constants.ERRORS.BAD_COMMAND_FORMAT);
-        break;
-      
       case 'add':
       case 'set':
       case 'append':
@@ -142,6 +134,17 @@ class CommandParser {
           result.noreply = commandArr[6] == "noreply";
         }
 
+        break;
+
+      case 'get':
+      case 'gets':
+
+        result.key = commandArr.slice(1, commandArr.length);
+        if (result.key.length == 0)
+          throw new Error(Constants.ERRORS.BAD_COMMAND_FORMAT);
+        break;
+      
+      case 'quit':
         break;
       
       default:
