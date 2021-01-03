@@ -13,7 +13,13 @@
   "author": "almeneses",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^7.17.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.0",
+    "husky": "^4.3.6",
     "jest": "^26.4.2",
-    "memcached": "^2.2.2"
+    "memcached": "^2.2.2",
+    "prettier": "^2.2.1"
   }
 }
